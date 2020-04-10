@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,8 @@
 		4FACAF05243F52E600F228A8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4FACAF03243F52E600F228A8 /* Main.storyboard */; };
 		4FACAF11243F52E700F228A8 /* RTPViewerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAF10243F52E700F228A8 /* RTPViewerTests.swift */; };
 		4FACAF1C243F52E700F228A8 /* RTPViewerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAF1B243F52E700F228A8 /* RTPViewerUITests.swift */; };
+		4FACAF2B2440D8E000F228A8 /* RTPH264Reciever.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAF2A2440D8E000F228A8 /* RTPH264Reciever.swift */; };
+		4FACAF2E2440D91700F228A8 /* SwiftRTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4FACAF2D2440D91700F228A8 /* SwiftRTP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +48,8 @@
 		4FACAF17243F52E700F228A8 /* RTPViewerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RTPViewerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FACAF1B243F52E700F228A8 /* RTPViewerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPViewerUITests.swift; sourceTree = "<group>"; };
 		4FACAF1D243F52E700F228A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4FACAF29243F537B00F228A8 /* SwiftRTP */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SwiftRTP; path = ../SwiftRTP; sourceTree = "<group>"; };
+		4FACAF2A2440D8E000F228A8 /* RTPH264Reciever.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPH264Reciever.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4FACAF2E2440D91700F228A8 /* SwiftRTP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,10 +81,12 @@
 		4FACAEF1243F52E500F228A8 = {
 			isa = PBXGroup;
 			children = (
+				4FACAF29243F537B00F228A8 /* SwiftRTP */,
 				4FACAEFC243F52E500F228A8 /* RTPViewer */,
 				4FACAF0F243F52E700F228A8 /* RTPViewerTests */,
 				4FACAF1A243F52E700F228A8 /* RTPViewerUITests */,
 				4FACAEFB243F52E500F228A8 /* Products */,
+				4FACAF2C2440D91700F228A8 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -102,6 +109,7 @@
 				4FACAF03243F52E600F228A8 /* Main.storyboard */,
 				4FACAF06243F52E600F228A8 /* Info.plist */,
 				4FACAF07243F52E600F228A8 /* RTPViewer.entitlements */,
+				4FACAF2A2440D8E000F228A8 /* RTPH264Reciever.swift */,
 			);
 			path = RTPViewer;
 			sourceTree = "<group>";
@@ -124,6 +132,13 @@
 			path = RTPViewerUITests;
 			sourceTree = "<group>";
 		};
+		4FACAF2C2440D91700F228A8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -140,6 +155,9 @@
 			dependencies = (
 			);
 			name = RTPViewer;
+			packageProductDependencies = (
+				4FACAF2D2440D91700F228A8 /* SwiftRTP */,
+			);
 			productName = RTPViewer;
 			productReference = 4FACAEFA243F52E500F228A8 /* RTPViewer.app */;
 			productType = "com.apple.product-type.application";
@@ -256,6 +274,7 @@
 			files = (
 				4FACAF00243F52E500F228A8 /* ViewController.swift in Sources */,
 				4FACAEFE243F52E500F228A8 /* AppDelegate.swift in Sources */,
+				4FACAF2B2440D8E000F228A8 /* RTPH264Reciever.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -579,6 +598,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4FACAF2D2440D91700F228A8 /* SwiftRTP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftRTP;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4FACAEF2243F52E500F228A8 /* Project object */;
 }

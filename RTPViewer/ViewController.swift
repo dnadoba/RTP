@@ -7,13 +7,29 @@
 //
 
 import Cocoa
+import Network
+import AVFoundation
+
+class VideoView: NSView {
+    var displayLayer: AVSampleBufferDisplayLayer { layer as! AVSampleBufferDisplayLayer }
+    override func makeBackingLayer() -> CALayer {
+        AVSampleBufferDisplayLayer()
+    }
+}
 
 class ViewController: NSViewController {
-
+    var reciever: RTPH264Reciever?
+    var videoView: VideoView { view as! VideoView }
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        reciever = RTPH264Reciever(host: "127.0.0.1", port: 1234)
+        //reciever = RTPH264Reciever(host: "224.0.0.1", port: 1234)
+        reciever?.callback = { buffer in
+            DispatchQueue.main.async {
+                print("did recive buffer")
+                self.videoView.displayLayer.enqueue(buffer)
+            }
+        }
     }
 
     override var representedObject: Any? {
@@ -22,6 +38,8 @@ class ViewController: NSViewController {
         }
     }
 
-
+    deinit {
+        print("deinit \(ViewController.self)")
+    }
 }
 
