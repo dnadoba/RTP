@@ -95,7 +95,10 @@ final class RTPH264Reciever {
             defer {
                 self.scheduleReciveMessage(connection: connection)
             }
-            guard isComplete else { return }
+            guard isComplete else {
+                print("did recieve incomplete message")
+                return
+            }
             if let error = error {
                 print(error)
                 return
