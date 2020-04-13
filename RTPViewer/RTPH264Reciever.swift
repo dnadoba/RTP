@@ -149,12 +149,14 @@ final class RTPH264Reciever {
     private func didReciveNALUnit(_ nalu: NALUnit<Data>, header: RTPHeader) {
         if nalu.header.type == .sequenceParameterSet {
             sequenceParameterSet = nalu
+            formatDescription = nil
         }
         if nalu.header.type == .pictureParameterSet {
             pictureParameterSet = nalu
+            formatDescription = nil
         }
-        //if formatDescription == nil,
-        if let sequenceParameterSet = self.sequenceParameterSet,
+        if formatDescription == nil,
+            let sequenceParameterSet = self.sequenceParameterSet,
             let pictureParameterSet = self.pictureParameterSet {
             do {
                 formatDescription = try CMVideoFormatDescriptionCreateForH264From(
@@ -183,7 +185,7 @@ final class RTPH264Reciever {
 
 extension NALUnitType {
     var shouldSendToDecoder: Bool {
-        return self.isSinglePacket && self != .pictureParameterSet && self != .pictureParameterSet && rawValue != 7
+        return self.isSinglePacket && self != .pictureParameterSet && self != .sequenceParameterSet && rawValue != 6
     }
 }
 
