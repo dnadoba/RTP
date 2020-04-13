@@ -26,7 +26,6 @@ class ViewController: NSViewController {
         //reciever = RTPH264Reciever(host: "224.0.0.1", port: 1234)
         reciever?.callback = { buffer in
             DispatchQueue.main.async {
-                print("did recive buffer")
                 self.videoView.displayLayer.enqueue(buffer)
             }
         }

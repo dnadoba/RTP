@@ -167,7 +167,7 @@ final class RTPH264Reciever {
             return
         }
         if nalu.header.type.shouldSendToDecoder {
-            //print(nalu.header, nalu.payload.count)
+            print(nalu.header.type, nalu.payload.count)
             do {
                 let buffer = try sampleBufferFromNalu(nalu, header: header, formatDescription: formatDescription)
                 callback?(buffer)
@@ -180,7 +180,7 @@ final class RTPH264Reciever {
 
 extension NALUnitType {
     var shouldSendToDecoder: Bool {
-        return rawValue == 1 || rawValue == 5
+        return self.isSinglePacket && self != .pictureParameterSet && self != .pictureParameterSet && rawValue != 7
     }
 }
 
@@ -193,16 +193,18 @@ struct OSStatusError: Error {
 func CMVideoFormatDescriptionCreateForH264From(sequenceParameterSet: NALUnit<Data>, pictureParameterSet: NALUnit<Data>) throws -> CMVideoFormatDescription? {
     try sequenceParameterSet.bytes.withUnsafeBytes { (sequenceParameterPointer: UnsafeRawBufferPointer) in
         try pictureParameterSet.bytes.withUnsafeBytes { (pictureParameterPointers: UnsafeRawBufferPointer) in
-            let parameters = [
-                sequenceParameterPointer.bindMemory(to: UInt8.self),
-                pictureParameterPointers.bindMemory(to: UInt8.self),
+            let parameterBuffers = [
+                sequenceParameterPointer,
+                pictureParameterPointers,
             ]
-            let paramterSizes = parameters.map(\.count)
+            let parameters = parameterBuffers.map({ $0.baseAddress!.assumingMemoryBound(to: UInt8.self) })
+            let paramterSizes = parameterBuffers.map(\.count)
             var formatDescription: CMFormatDescription?
+
             let status = CMVideoFormatDescriptionCreateFromH264ParameterSets(
                 allocator: nil,
                 parameterSetCount: parameters.count,
-                parameterSetPointers: parameters.map({ $0.baseAddress! }),
+                parameterSetPointers: parameters,
                 parameterSetSizes: paramterSizes,
                 nalUnitHeaderLength: 4,
                 formatDescriptionOut: &formatDescription)
@@ -221,7 +223,7 @@ private func freeBlock(_ refCon: UnsafeMutableRawPointer?, doomedMemoryBlock: Un
 
 public extension DispatchData {
     func toCMBlockBuffer() throws -> CMBlockBuffer {
-        return try withUnsafeBytes {
+        return try self.withUnsafeBytes {
             (pointer: UnsafePointer<UInt8>) -> CMBlockBuffer in
             
             let data = NSMutableData(bytes: pointer, length: count)
@@ -265,7 +267,6 @@ func sampleBufferFromNalu(_ nalu: NALUnit<Data>, header: RTPHeader, formatDescri
         DispatchData(bytes: header)
     }
     assert(data.count == 5)
-    print(data.count, data.map({ String("\($0)") }))
     nalu.payload.withUnsafeBytes { (payload) in
        
         let payload = UnsafeRawBufferPointer(start: payload.baseAddress!.advanced(by: offset), count: payload.count - offset)
@@ -280,8 +281,8 @@ func sampleBufferFromNalu(_ nalu: NALUnit<Data>, header: RTPHeader, formatDescri
     // Computer the duration and time
     let duration = CMTime.invalid // CMTimeMake(3000, H264ClockRate) // TODO: 1/30th of a second. Making this up.
 
-    //let time = CMTime(value: Int64(header.timestamp), timescale: h264ClockRate)
-    let time = CMClockGetHostTimeClock().time
+    let time = CMTime(value: Int64(header.timestamp), timescale: h264ClockRate)
+    //let time = CMClockGetHostTimeClock().time
     // Inputs to CMSampleBufferCreate
     let timingInfo: [CMSampleTimingInfo] = [CMSampleTimingInfo(duration: duration, presentationTimeStamp: time, decodeTimeStamp: time)]
     let sampleSizes: [Int] = [CMBlockBufferGetDataLength(blockBuffer)]
