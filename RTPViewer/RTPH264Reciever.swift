@@ -115,10 +115,19 @@ final class RTPH264Reciever {
         }
     }
     private var h264Parser = NALPackageParser<Data>()
+    var prevSequenceNumber: UInt16?
     private func parse(_ data: Data) throws {
         var reader = BinaryReader(bytes: data)
         let header = try RTPHeader(reader: &reader)
-        print(header)
+        defer { prevSequenceNumber = header.sequenceNumber }
+        if let prevSequenceNumber = prevSequenceNumber,
+        prevSequenceNumber >= header.sequenceNumber && prevSequenceNumber != UInt16.max {
+            print("packets in wrong order prevSequenceNumber: \(prevSequenceNumber) current: \(header.sequenceNumber)")
+        }
+        if let prevSequenceNumber = prevSequenceNumber,
+            abs(Int(header.sequenceNumber) - Int(prevSequenceNumber)) != 1 {
+            print("packet lost prevSequenceNumber: \(prevSequenceNumber) current: \(header.sequenceNumber)")
+        }
         let nalUnits = try h264Parser.readPackage(from: &reader)
         if !nalUnits.isEmpty {
             didReciveNALUnits(nalUnits, header: header)
@@ -141,8 +150,8 @@ final class RTPH264Reciever {
         if nalu.header.type == .pictureParameterSet {
             pictureParameterSet = nalu
         }
-        if formatDescription == nil,
-            let sequenceParameterSet = self.sequenceParameterSet,
+        //if formatDescription == nil,
+        if let sequenceParameterSet = self.sequenceParameterSet,
             let pictureParameterSet = self.pictureParameterSet {
             do {
                 formatDescription = try CMVideoFormatDescriptionCreateForH264From(
@@ -158,7 +167,7 @@ final class RTPH264Reciever {
             return
         }
         if nalu.header.type.shouldSendToDecoder {
-            print(nalu.header, nalu.payload.count)
+            //print(nalu.header, nalu.payload.count)
             do {
                 let buffer = try sampleBufferFromNalu(nalu, header: header, formatDescription: formatDescription)
                 callback?(buffer)
@@ -171,7 +180,7 @@ final class RTPH264Reciever {
 
 extension NALUnitType {
     var shouldSendToDecoder: Bool {
-        return (1...2).contains(rawValue)
+        return rawValue == 1 || rawValue == 5
     }
 }
 
@@ -248,21 +257,21 @@ fileprivate let h264ClockRate: Int32 = 90_000
 
 func sampleBufferFromNalu(_ nalu: NALUnit<Data>, header: RTPHeader, formatDescription: CMFormatDescription) throws -> CMSampleBuffer {
     // Prepend the size of the data to the data as a 32-bit network endian uint. (keyword: "elementary stream")
-    let offset = 4
-    let size = UInt32(nalu.payload.count - offset + 1)
+    let offset = 0
+    let size = UInt32((nalu.payload.count - offset) + 1)
     
     let prefix = size.toNetworkByteOrder.data + Data([nalu.header.byte])
-    var data = withUnsafeBytes(of: prefix) { (header) in
+    var data = prefix.withUnsafeBytes{ (header) in
         DispatchData(bytes: header)
     }
-    withUnsafeBytes(of: nalu.payload) { (payload) in
+    assert(data.count == 5)
+    print(data.count, data.map({ String("\($0)") }))
+    nalu.payload.withUnsafeBytes { (payload) in
        
         let payload = UnsafeRawBufferPointer(start: payload.baseAddress!.advanced(by: offset), count: payload.count - offset)
         data.append(payload)
     }
-    for index in 0..<16 {
-        print(Array(nalu.payload)[index])
-    }
+    assert(data.count == size + 4)
     
     let blockBuffer = try data.toCMBlockBuffer()
 
@@ -271,8 +280,8 @@ func sampleBufferFromNalu(_ nalu: NALUnit<Data>, header: RTPHeader, formatDescri
     // Computer the duration and time
     let duration = CMTime.invalid // CMTimeMake(3000, H264ClockRate) // TODO: 1/30th of a second. Making this up.
 
-    let time = CMTime(value: Int64(header.timestamp), timescale: h264ClockRate)
-    
+    //let time = CMTime(value: Int64(header.timestamp), timescale: h264ClockRate)
+    let time = CMClockGetHostTimeClock().time
     // Inputs to CMSampleBufferCreate
     let timingInfo: [CMSampleTimingInfo] = [CMSampleTimingInfo(duration: duration, presentationTimeStamp: time, decodeTimeStamp: time)]
     let sampleSizes: [Int] = [CMBlockBufferGetDataLength(blockBuffer)]
