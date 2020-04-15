@@ -121,7 +121,7 @@ final class RTPH264Reciever {
     var prevSequenceNumber: UInt16?
     private func parse(_ data: Data) throws {
         var reader = BinaryReader(bytes: data)
-        let header = try RTPHeader(reader: &reader)
+        let header = try RTPHeader(from: &reader)
         defer { prevSequenceNumber = header.sequenceNumber }
         if let prevSequenceNumber = prevSequenceNumber,
         prevSequenceNumber >= header.sequenceNumber && prevSequenceNumber != UInt16.max {
