@@ -117,7 +117,7 @@ final class RTPH264Reciever {
             print(error)
         }
     }
-    private var h264Parser = NALNonInterleavedPackageParser<Data>()
+    private var h264Parser = H264.NALNonInterleavedPacketParser<Data>()
     var prevSequenceNumber: UInt16?
     private func parse(_ data: Data) throws {
         var reader = BinaryReader(bytes: data)
@@ -137,16 +137,16 @@ final class RTPH264Reciever {
         }
     }
     
-    private var sequenceParameterSet: NALUnit<Data>?
-    private var pictureParameterSet: NALUnit<Data>?
+    private var sequenceParameterSet: H264.NALUnit<Data>?
+    private var pictureParameterSet: H264.NALUnit<Data>?
     private var formatDescription: CMVideoFormatDescription?
-    private func didReciveNALUnits(_ nalus: [NALUnit<Data>], header: RTPHeader) {
+    private func didReciveNALUnits(_ nalus: [H264.NALUnit<Data>], header: RTPHeader) {
         for nalu in nalus {
             self.didReciveNALUnit(nalu, header: header)
         }
         
     }
-    private func didReciveNALUnit(_ nalu: NALUnit<Data>, header: RTPHeader) {
+    private func didReciveNALUnit(_ nalu: H264.NALUnit<Data>, header: RTPHeader) {
         if nalu.header.type == .sequenceParameterSet {
             sequenceParameterSet = nalu
             formatDescription = nil
@@ -183,7 +183,7 @@ final class RTPH264Reciever {
     }
 }
 
-extension NALUnitType {
+extension H264.NALUnitType {
     var shouldSendToDecoder: Bool {
         return self.isSinglePacket && self != .pictureParameterSet && self != .sequenceParameterSet && rawValue != 6
     }
@@ -195,7 +195,7 @@ struct OSStatusError: Error {
     var osStatus: OSStatus
     var description: String = "none"
 }
-func CMVideoFormatDescriptionCreateForH264From(sequenceParameterSet: NALUnit<Data>, pictureParameterSet: NALUnit<Data>) throws -> CMVideoFormatDescription? {
+func CMVideoFormatDescriptionCreateForH264From(sequenceParameterSet: H264.NALUnit<Data>, pictureParameterSet: H264.NALUnit<Data>) throws -> CMVideoFormatDescription? {
     try sequenceParameterSet.bytes.withUnsafeBytes { (sequenceParameterPointer: UnsafeRawBufferPointer) in
         try pictureParameterSet.bytes.withUnsafeBytes { (pictureParameterPointers: UnsafeRawBufferPointer) in
             let parameterBuffers = [
@@ -262,7 +262,7 @@ public extension DispatchData {
 
 fileprivate let h264ClockRate: Int32 = 90_000
 
-func sampleBufferFromNalu(_ nalu: NALUnit<Data>, header: RTPHeader, formatDescription: CMFormatDescription) throws -> CMSampleBuffer {
+func sampleBufferFromNalu(_ nalu: H264.NALUnit<Data>, header: RTPHeader, formatDescription: CMFormatDescription) throws -> CMSampleBuffer {
     // Prepend the size of the data to the data as a 32-bit network endian uint. (keyword: "elementary stream")
     let offset = 0
     let size = UInt32((nalu.payload.count - offset) + 1)
