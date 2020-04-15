@@ -314,6 +314,9 @@ func sampleBufferFromNalu(_ nalu: NALUnit<Data>, header: RTPHeader, formatDescri
         throw OSStatusError(osStatus: result, description: "CMSampleBufferCreate() failed")
     }
     
+    CMSetAttachment(unwrapedSampleBuffer, key: kCMSampleAttachmentKey_DisplayImmediately, value: kCFBooleanTrue, attachmentMode: kCMAttachmentMode_ShouldPropagate)
+    
+    
     //CMSampleBufferSetDisplayImmediately(sampleBuffer)
 
     return unwrapedSampleBuffer

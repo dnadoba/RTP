@@ -12,6 +12,11 @@ import AVFoundation
 
 class VideoView: NSView {
     var displayLayer: AVSampleBufferDisplayLayer { layer as! AVSampleBufferDisplayLayer }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        self.wantsLayer = true
+    }
     override func makeBackingLayer() -> CALayer {
         AVSampleBufferDisplayLayer()
     }
@@ -28,6 +33,9 @@ class ViewController: NSViewController {
             DispatchQueue.main.async {
                 self.videoView.displayLayer.enqueue(buffer)
             }
+        }
+        NotificationCenter.default.addObserver(forName: .AVSampleBufferDisplayLayerFailedToDecode, object: videoView.displayLayer, queue: .main) { (notification) in
+            print(notification)
         }
     }
 
