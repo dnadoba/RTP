@@ -117,7 +117,7 @@ final class RTPH264Reciever {
             print(error)
         }
     }
-    private var h264Parser = NALPackageParser<Data>()
+    private var h264Parser = NALNonInterleavedPackageParser<Data>()
     var prevSequenceNumber: UInt16?
     private func parse(_ data: Data) throws {
         var reader = BinaryReader(bytes: data)
