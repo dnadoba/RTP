@@ -141,9 +141,6 @@ final class RTPH264Reciever {
     private var pictureParameterSet: H264.NALUnit<Data>?
     private var formatDescription: CMVideoFormatDescription?
     
-    private var nalusOfAccessUnit = [H264.NALUnit<Data>]()
-    private var accessUnitTimestamp: UInt32?
-    
     private func didReciveNALUnits(_ nalus: [H264.NALUnit<Data>], header: RTPHeader) {
         for nalu in nalus {
             self.didReciveNALUnit(nalu, header: header)
@@ -160,24 +157,11 @@ final class RTPH264Reciever {
                 print(error)
             }
         }
+        VTDecompressionSession
         
-        if let accessUnitTimestamp = self.accessUnitTimestamp,
-            accessUnitTimestamp != header.timestamp,
-            nalusOfAccessUnit.count > 0 {
-            processNalusOfAccessUnit(nalus: nalusOfAccessUnit, timestamp: accessUnitTimestamp)
-            nalusOfAccessUnit = []
-        }
         
-        let decodableNalus = nalus.filter({ $0.header.type.shouldSendToDecoder })
-        nalusOfAccessUnit.append(contentsOf: decodableNalus)
-        
-        if header.marker {
-            defer {
-                nalusOfAccessUnit = []
-                accessUnitTimestamp = nil
-            }
-            
-            processNalusOfAccessUnit(nalus: nalusOfAccessUnit, timestamp: header.timestamp)
+        for vclNalu in nalus.filter({ $0.header.type.isVideoCodingLayer }) {
+            didReciveVCLNALU(vclNalu, header: header)
         }
     }
     private func didReciveNALUnit(_ nalu: H264.NALUnit<Data>, header: RTPHeader) {
@@ -190,25 +174,17 @@ final class RTPH264Reciever {
             formatDescription = nil
         }
     }
-    
-    private func processNalusOfAccessUnit(nalus: [H264.NALUnit<Data>], timestamp: UInt32) {
+    private func didReciveVCLNALU(_ nalu: H264.NALUnit<Data>, header: RTPHeader) {
         guard let formatDescription = formatDescription else {
-            print("did recieve NALUs of type \(nalus.map({ $0.header.type })) before formatDescription is ready")
+            print("did recieve VCL NALU of type \(nalu.header.type) before formatDescription is ready")
             return
         }
         do {
-            let buffer = try sampleBufferFromNalus(nalus, timestamp: timestamp, formatDescription: formatDescription)
+            let buffer = try sampleBufferFromNalu(nalu, timestamp: header.timestamp, formatDescription: formatDescription)
             callback?(buffer)
         } catch {
             print(error)
         }
-        
-    }
-}
-
-extension H264.NALUnitType {
-    var shouldSendToDecoder: Bool {
-        return self.isSinglePacket && self != .pictureParameterSet && self != .sequenceParameterSet && rawValue != 6
     }
 }
 
@@ -291,38 +267,24 @@ enum SampleBufferError: Error {
 }
 
 
-func sampleBufferFromNalus(_ nalus: [H264.NALUnit<Data>], timestamp: UInt32, formatDescription: CMFormatDescription) throws -> CMSampleBuffer {
-    guard let header = nalus.first?.header else {
-        throw SampleBufferError.canNotCreateBufferFromZeroNalus
+func sampleBufferFromNalu(_ nalu: H264.NALUnit<Data>, timestamp: UInt32, formatDescription: CMFormatDescription) throws -> CMSampleBuffer {
+    // Prepend the size of the data to the data as a 32-bit network endian uint. (keyword: "elementary stream")
+    let offset = 0
+    let size = UInt32((nalu.payload.count - offset) + 1)
+    
+    let prefix = size.toNetworkByteOrder.data + Data([nalu.header.byte])
+    var data = prefix.withUnsafeBytes{ (header) in
+        DispatchData(bytes: header)
     }
-    guard nalus.dropFirst().allSatisfy({ $0.header == header }) else {
-        throw SampleBufferError.canNotCreateBufferFromNalusOfDifferentHeaders
+    assert(data.count == 5)
+    nalu.payload.withUnsafeBytes { (payload) in
+       
+        let payload = UnsafeRawBufferPointer(start: payload.baseAddress!.advanced(by: offset), count: payload.count - offset)
+        data.append(payload)
     }
+    assert(data.count == size + 4)
     
-    var allData = [UInt8]().withUnsafeBytes { (bytes) in
-        DispatchData.init(bytes: bytes)
-    }
-    
-    var sizes: [Int] = []
-    
-    for nalu in nalus {
-        // Prepend the size of the data to the data as a 32-bit network endian uint. (keyword: "elementary stream")
-        let payloadSize = nalu.payload.count
-        let size = UInt32(payloadSize + 1)
-        
-        let prefix = size.toNetworkByteOrder.data + Data([header.byte])
-        var data = prefix.withUnsafeBytes{ (header) in
-            DispatchData(bytes: header)
-        }
-        nalu.payload.withUnsafeBytes { (payload) in
-            data.append(payload)
-        }
-        allData.append(data)
-        sizes.append(data.count)
-    }
-    
-    
-    let blockBuffer = try allData.toCMBlockBuffer()
+    let blockBuffer = try data.toCMBlockBuffer()
 
     // So what about STAP???? From CMSampleBufferCreate "Behavior is undefined if samples in a CMSampleBuffer (or even in multiple buffers in the same stream) have the same presentationTimeStamp"
 
@@ -333,8 +295,7 @@ func sampleBufferFromNalus(_ nalus: [H264.NALUnit<Data>], timestamp: UInt32, for
     //let time = CMClockGetHostTimeClock().time
     // Inputs to CMSampleBufferCreate
     let timingInfo: [CMSampleTimingInfo] = [CMSampleTimingInfo(duration: duration, presentationTimeStamp: time, decodeTimeStamp: time)]
-    //let sampleSizes: [Int] = [CMBlockBufferGetDataLength(blockBuffer)]
-    let sampleSizes = sizes
+    let sampleSizes: [Int] = [CMBlockBufferGetDataLength(blockBuffer)]
 
     // Outputs from CMSampleBufferCreate
     var sampleBuffer: CMSampleBuffer?
@@ -346,7 +307,7 @@ func sampleBufferFromNalus(_ nalus: [H264.NALUnit<Data>], timestamp: UInt32, for
         makeDataReadyCallback: nil,                            // makeDataReadyCallback: CMSampleBufferMakeDataReadyCallback?,
         refcon: nil,                            // makeDataReadyRefcon: UnsafeMutablePointer<Void>,
         formatDescription: formatDescription,              // formatDescription: CMFormatDescription?,
-        sampleCount: sampleSizes.count,                              // numSamples: CMItemCount,
+        sampleCount: 1,                              // numSamples: CMItemCount,
         sampleTimingEntryCount: timingInfo.count,               // numSampleTimingEntries: CMItemCount,
         sampleTimingArray: timingInfo,                     // sampleTimingArray: UnsafePointer<CMSampleTimingInfo>,
         sampleSizeEntryCount: sampleSizes.count,              // numSampleSizeEntries: CMItemCount,
