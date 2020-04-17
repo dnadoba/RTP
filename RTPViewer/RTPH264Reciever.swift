@@ -157,7 +157,6 @@ final class RTPH264Reciever {
                 print(error)
             }
         }
-        VTDecompressionSession
         
         
         for vclNalu in nalus.filter({ $0.header.type.isVideoCodingLayer }) {
