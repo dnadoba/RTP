@@ -298,23 +298,31 @@ func sampleBufferFromNalus(_ nalus: [H264.NALUnit<Data>], timestamp: UInt32, for
     guard nalus.dropFirst().allSatisfy({ $0.header == header }) else {
         throw SampleBufferError.canNotCreateBufferFromNalusOfDifferentHeaders
     }
-    // Prepend the size of the data to the data as a 32-bit network endian uint. (keyword: "elementary stream")
-    let payloadSize = nalus.map({ $0.payload.count }).reduce(0, +)
-    let size = UInt32(payloadSize + 1)
     
-    let prefix = size.toNetworkByteOrder.data + Data([header.byte])
-    var data = prefix.withUnsafeBytes{ (header) in
-        DispatchData(bytes: header)
+    var allData = [UInt8]().withUnsafeBytes { (bytes) in
+        DispatchData.init(bytes: bytes)
     }
-    assert(data.count == 5)
+    
+    var sizes: [Int] = []
+    
     for nalu in nalus {
+        // Prepend the size of the data to the data as a 32-bit network endian uint. (keyword: "elementary stream")
+        let payloadSize = nalu.payload.count
+        let size = UInt32(payloadSize + 1)
+        
+        let prefix = size.toNetworkByteOrder.data + Data([header.byte])
+        var data = prefix.withUnsafeBytes{ (header) in
+            DispatchData(bytes: header)
+        }
         nalu.payload.withUnsafeBytes { (payload) in
             data.append(payload)
         }
+        allData.append(data)
+        sizes.append(data.count)
     }
-    assert(data.count == size + 4)
     
-    let blockBuffer = try data.toCMBlockBuffer()
+    
+    let blockBuffer = try allData.toCMBlockBuffer()
 
     // So what about STAP???? From CMSampleBufferCreate "Behavior is undefined if samples in a CMSampleBuffer (or even in multiple buffers in the same stream) have the same presentationTimeStamp"
 
@@ -325,7 +333,8 @@ func sampleBufferFromNalus(_ nalus: [H264.NALUnit<Data>], timestamp: UInt32, for
     //let time = CMClockGetHostTimeClock().time
     // Inputs to CMSampleBufferCreate
     let timingInfo: [CMSampleTimingInfo] = [CMSampleTimingInfo(duration: duration, presentationTimeStamp: time, decodeTimeStamp: time)]
-    let sampleSizes: [Int] = [CMBlockBufferGetDataLength(blockBuffer)]
+    //let sampleSizes: [Int] = [CMBlockBufferGetDataLength(blockBuffer)]
+    let sampleSizes = sizes
 
     // Outputs from CMSampleBufferCreate
     var sampleBuffer: CMSampleBuffer?
@@ -337,7 +346,7 @@ func sampleBufferFromNalus(_ nalus: [H264.NALUnit<Data>], timestamp: UInt32, for
         makeDataReadyCallback: nil,                            // makeDataReadyCallback: CMSampleBufferMakeDataReadyCallback?,
         refcon: nil,                            // makeDataReadyRefcon: UnsafeMutablePointer<Void>,
         formatDescription: formatDescription,              // formatDescription: CMFormatDescription?,
-        sampleCount: 1,                              // numSamples: CMItemCount,
+        sampleCount: sampleSizes.count,                              // numSamples: CMItemCount,
         sampleTimingEntryCount: timingInfo.count,               // numSampleTimingEntries: CMItemCount,
         sampleTimingArray: timingInfo,                     // sampleTimingArray: UnsafePointer<CMSampleTimingInfo>,
         sampleSizeEntryCount: sampleSizes.count,              // numSampleSizeEntries: CMItemCount,
