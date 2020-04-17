@@ -13,34 +13,52 @@ import BinaryKit
 import Dispatch
 import VideoToolbox
 
-//struct VideoDecoder {
-//    typealias Callback = () -> ()
-//    fileprivate var session: VTDecompressionSession
-//    var callback: Callback?
-//    init(formatDescription: CMVideoFormatDescription) throws {
-//        var session: VTDecompressionSession?
-//        let callback = VTDecompressionOutputCallbackRecord(
-//            decompressionOutputCallback: { (decompressionOutputRefCon, sourceFrameRefCon, status, infoFlags, imageBuffer, presentationTimeStamp, presentationDuration) in
-//                guard status == kOSReturnSuccess else {
-//                    print(OSStatusError(osStatus: status, description: "VTDecompressionOutputCallbackRecord"))
-//                    return
-//                }
-//        },
-//            decompressionOutputRefCon: nil)
-//        let status = VTDecompressionSessionCreate(
-//            allocator: nil, formatDescription: formatDescription,
-//            decoderSpecification: nil,
-//            imageBufferAttributes: nil,
-//            outputCallback: callback, decompressionSessionOut: &session)
-//        guard status == kOSReturnSuccess, let unwrapedSession = session else {
-//            throw OSStatusError(osStatus: status, description: "failed to create \(VTDecompressionSession.self) from \(formatDescription)")
-//        }
-//        self.session = unwrapedSession
-//    }
-//    private func decompressionOutputCallback(imageBuffer: CVPixelBuffer?, presentationTimeStamp: CMTime, presentationDuration: CMTime) {
-//
-//    }
-//}
+struct VideoDecoder {
+    typealias Callback = () -> ()
+    fileprivate var session: VTDecompressionSession
+    var callback: Callback?
+    init(formatDescription: CMVideoFormatDescription) throws {
+        var session: VTDecompressionSession?
+        let callback = VTDecompressionOutputCallbackRecord(
+            decompressionOutputCallback: { (decompressionOutputRefCon, sourceFrameRefCon, status, infoFlags, imageBuffer, presentationTimeStamp, presentationDuration) in
+                guard status == kOSReturnSuccess else {
+                    print(OSStatusError(osStatus: status, description: "VTDecompressionOutputCallbackRecord"))
+                    return
+                }
+        },
+            decompressionOutputRefCon: nil)
+        let status = withUnsafePointer(to: callback) { (callbackPointer) in
+            VTDecompressionSessionCreate(
+                allocator: nil, formatDescription: formatDescription,
+                decoderSpecification: nil,
+                imageBufferAttributes: nil,
+                outputCallback: callbackPointer, decompressionSessionOut: &session)
+        }
+        
+        guard status == kOSReturnSuccess, let unwrapedSession = session else {
+            throw OSStatusError(osStatus: status, description: "failed to create \(VTDecompressionSession.self) from \(formatDescription)")
+        }
+        self.session = unwrapedSession
+    }
+    private func decompressionOutputCallback(imageBuffer: CVPixelBuffer?, presentationTimeStamp: CMTime, presentationDuration: CMTime) {
+
+    }
+    func decode(sampleBuffer: CMSampleBuffer) throws {
+        var infoFlags = VTDecodeInfoFlags()
+        let status = VTDecompressionSessionDecodeFrame(session,
+                                          sampleBuffer: sampleBuffer,
+                                          flags: [._1xRealTimePlayback, ._EnableAsynchronousDecompression, ._EnableTemporalProcessing],
+                                          frameRefcon: nil,
+                                          infoFlagsOut: &infoFlags)
+        print(infoFlags)
+        guard status == kOSReturnSuccess else {
+            throw OSStatusError(osStatus: status, description: "failed to decode frame \(sampleBuffer) info flags: \(infoFlags)")
+        }
+    }
+    func canDecodeFormat(_ formatDescription: CMFormatDescription) -> Bool {
+        VTDecompressionSessionCanAcceptFormatDescription(session, formatDescription: formatDescription)
+    }
+}
 
 final class RTPH264Reciever {
     typealias Callback = (CMSampleBuffer) -> ()
@@ -137,9 +155,22 @@ final class RTPH264Reciever {
         }
     }
     
-    private var sequenceParameterSet: H264.NALUnit<Data>?
-    private var pictureParameterSet: H264.NALUnit<Data>?
+    private var sequenceParameterSet: H264.NALUnit<Data>? {
+        didSet {
+            if oldValue != sequenceParameterSet {
+                formatDescription = nil
+            }
+        }
+    }
+    private var pictureParameterSet: H264.NALUnit<Data>? {
+        didSet {
+            if oldValue != pictureParameterSet {
+                formatDescription = nil
+            }
+        }
+    }
     private var formatDescription: CMVideoFormatDescription?
+    private var decoder: VideoDecoder?
     
     private func didReciveNALUnits(_ nalus: [H264.NALUnit<Data>], header: RTPHeader) {
         for nalu in nalus {
@@ -149,10 +180,20 @@ final class RTPH264Reciever {
             let sequenceParameterSet = self.sequenceParameterSet,
             let pictureParameterSet = self.pictureParameterSet {
             do {
-                formatDescription = try CMVideoFormatDescriptionCreateForH264From(
+                let formatDescription = try CMVideoFormatDescriptionCreateForH264From(
                     sequenceParameterSet: sequenceParameterSet,
                     pictureParameterSet: pictureParameterSet
                 )
+                self.formatDescription = formatDescription
+                if let newFormatDescription = formatDescription {
+                    if let decoder = decoder {
+                        if !decoder.canDecodeFormat(newFormatDescription) {
+                            self.decoder = try VideoDecoder(formatDescription: newFormatDescription)
+                        }
+                    } else {
+                        self.decoder = try VideoDecoder(formatDescription: newFormatDescription)
+                    }
+                }
             } catch {
                 print(error)
             }
@@ -180,7 +221,11 @@ final class RTPH264Reciever {
         }
         do {
             let buffer = try sampleBufferFromNalu(nalu, timestamp: header.timestamp, formatDescription: formatDescription)
-            callback?(buffer)
+            if let callback = callback {
+                callback(buffer)
+            } else {
+                try self.decoder?.decode(sampleBuffer: buffer)
+            }
         } catch {
             print(error)
         }
