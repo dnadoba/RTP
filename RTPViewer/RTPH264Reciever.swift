@@ -140,20 +140,13 @@ final class RTPH264Reciever {
     private var sequenceParameterSet: H264.NALUnit<Data>?
     private var pictureParameterSet: H264.NALUnit<Data>?
     private var formatDescription: CMVideoFormatDescription?
+    
+    private var nalusOfAccessUnit = [H264.NALUnit<Data>]()
+    private var accessUnitTimestamp: UInt32?
+    
     private func didReciveNALUnits(_ nalus: [H264.NALUnit<Data>], header: RTPHeader) {
         for nalu in nalus {
             self.didReciveNALUnit(nalu, header: header)
-        }
-        
-    }
-    private func didReciveNALUnit(_ nalu: H264.NALUnit<Data>, header: RTPHeader) {
-        if nalu.header.type == .sequenceParameterSet {
-            sequenceParameterSet = nalu
-            formatDescription = nil
-        }
-        if nalu.header.type == .pictureParameterSet {
-            pictureParameterSet = nalu
-            formatDescription = nil
         }
         if formatDescription == nil,
             let sequenceParameterSet = self.sequenceParameterSet,
@@ -167,19 +160,49 @@ final class RTPH264Reciever {
                 print(error)
             }
         }
+        
+        if let accessUnitTimestamp = self.accessUnitTimestamp,
+            accessUnitTimestamp != header.timestamp,
+            nalusOfAccessUnit.count > 0 {
+            processNalusOfAccessUnit(nalus: nalusOfAccessUnit, timestamp: accessUnitTimestamp)
+            nalusOfAccessUnit = []
+        }
+        
+        let decodableNalus = nalus.filter({ $0.header.type.shouldSendToDecoder })
+        nalusOfAccessUnit.append(contentsOf: decodableNalus)
+        
+        if header.marker {
+            defer {
+                nalusOfAccessUnit = []
+                accessUnitTimestamp = nil
+            }
+            
+            processNalusOfAccessUnit(nalus: nalusOfAccessUnit, timestamp: header.timestamp)
+        }
+    }
+    private func didReciveNALUnit(_ nalu: H264.NALUnit<Data>, header: RTPHeader) {
+        if nalu.header.type == .sequenceParameterSet {
+            sequenceParameterSet = nalu
+            formatDescription = nil
+        }
+        if nalu.header.type == .pictureParameterSet {
+            pictureParameterSet = nalu
+            formatDescription = nil
+        }
+    }
+    
+    private func processNalusOfAccessUnit(nalus: [H264.NALUnit<Data>], timestamp: UInt32) {
         guard let formatDescription = formatDescription else {
-            print("did recieve nalu of type \(nalu.header.type) before formatDescription is ready")
+            print("did recieve NALUs of type \(nalus.map({ $0.header.type })) before formatDescription is ready")
             return
         }
-        if nalu.header.type.shouldSendToDecoder {
-            print(nalu.header.type, nalu.payload.count)
-            do {
-                let buffer = try sampleBufferFromNalu(nalu, header: header, formatDescription: formatDescription)
-                callback?(buffer)
-            } catch {
-                print(error)
-            }
+        do {
+            let buffer = try sampleBufferFromNalus(nalus, timestamp: timestamp, formatDescription: formatDescription)
+            callback?(buffer)
+        } catch {
+            print(error)
         }
+        
     }
 }
 
@@ -262,20 +285,32 @@ public extension DispatchData {
 
 fileprivate let h264ClockRate: Int32 = 90_000
 
-func sampleBufferFromNalu(_ nalu: H264.NALUnit<Data>, header: RTPHeader, formatDescription: CMFormatDescription) throws -> CMSampleBuffer {
+enum SampleBufferError: Error {
+    case canNotCreateBufferFromZeroNalus
+    case canNotCreateBufferFromNalusOfDifferentHeaders
+}
+
+
+func sampleBufferFromNalus(_ nalus: [H264.NALUnit<Data>], timestamp: UInt32, formatDescription: CMFormatDescription) throws -> CMSampleBuffer {
+    guard let header = nalus.first?.header else {
+        throw SampleBufferError.canNotCreateBufferFromZeroNalus
+    }
+    guard nalus.dropFirst().allSatisfy({ $0.header == header }) else {
+        throw SampleBufferError.canNotCreateBufferFromNalusOfDifferentHeaders
+    }
     // Prepend the size of the data to the data as a 32-bit network endian uint. (keyword: "elementary stream")
-    let offset = 0
-    let size = UInt32((nalu.payload.count - offset) + 1)
+    let payloadSize = nalus.map({ $0.payload.count }).reduce(0, +)
+    let size = UInt32(payloadSize + 1)
     
-    let prefix = size.toNetworkByteOrder.data + Data([nalu.header.byte])
+    let prefix = size.toNetworkByteOrder.data + Data([header.byte])
     var data = prefix.withUnsafeBytes{ (header) in
         DispatchData(bytes: header)
     }
     assert(data.count == 5)
-    nalu.payload.withUnsafeBytes { (payload) in
-       
-        let payload = UnsafeRawBufferPointer(start: payload.baseAddress!.advanced(by: offset), count: payload.count - offset)
-        data.append(payload)
+    for nalu in nalus {
+        nalu.payload.withUnsafeBytes { (payload) in
+            data.append(payload)
+        }
     }
     assert(data.count == size + 4)
     
@@ -286,7 +321,7 @@ func sampleBufferFromNalu(_ nalu: H264.NALUnit<Data>, header: RTPHeader, formatD
     // Computer the duration and time
     let duration = CMTime.invalid // CMTimeMake(3000, H264ClockRate) // TODO: 1/30th of a second. Making this up.
 
-    let time = CMTime(value: Int64(header.timestamp), timescale: h264ClockRate)
+    let time = CMTime(value: Int64(timestamp), timescale: h264ClockRate)
     //let time = CMClockGetHostTimeClock().time
     // Inputs to CMSampleBufferCreate
     let timingInfo: [CMSampleTimingInfo] = [CMSampleTimingInfo(duration: duration, presentationTimeStamp: time, decodeTimeStamp: time)]
@@ -314,10 +349,11 @@ func sampleBufferFromNalu(_ nalu: H264.NALUnit<Data>, header: RTPHeader, formatD
         throw OSStatusError(osStatus: result, description: "CMSampleBufferCreate() failed")
     }
     
-    CMSetAttachment(unwrapedSampleBuffer, key: kCMSampleAttachmentKey_DisplayImmediately, value: kCFBooleanTrue, attachmentMode: kCMAttachmentMode_ShouldPropagate)
-    
-    
-    //CMSampleBufferSetDisplayImmediately(sampleBuffer)
+    if let attachmentsOfSampleBuffers = CMSampleBufferGetSampleAttachmentsArray(unwrapedSampleBuffer, createIfNecessary: true) as? [NSMutableDictionary] {
+        for attachments in attachmentsOfSampleBuffers {
+            attachments[kCMSampleAttachmentKey_DisplayImmediately] = NSNumber(value: true)
+        }
+    }
 
     return unwrapedSampleBuffer
 }
