@@ -13,8 +13,8 @@ import BinaryKit
 import Dispatch
 import VideoToolbox
 
-struct VideoDecoder {
-    typealias Callback = () -> ()
+final class VideoDecoder {
+    typealias Callback = (_ imageBuffer: CVPixelBuffer?, _ presentationTimeStamp: CMTime, _ presentationDuration: CMTime) -> ()
     fileprivate var session: VTDecompressionSession
     var callback: Callback?
     init(formatDescription: CMVideoFormatDescription) throws {
@@ -41,21 +41,22 @@ struct VideoDecoder {
         self.session = unwrapedSession
     }
     private func decompressionOutputCallback(imageBuffer: CVPixelBuffer?, presentationTimeStamp: CMTime, presentationDuration: CMTime) {
-
+        callback?(imageBuffer, presentationTimeStamp, presentationDuration)
     }
-    func decode(sampleBuffer: CMSampleBuffer) throws {
+    @discardableResult
+    func decodeFrame(sampleBuffer: CMSampleBuffer, flags: VTDecodeFrameFlags = VTDecodeFrameFlags()) throws -> VTDecodeInfoFlags {
         var infoFlags = VTDecodeInfoFlags()
         let status = VTDecompressionSessionDecodeFrame(session,
                                           sampleBuffer: sampleBuffer,
-                                          flags: [._1xRealTimePlayback, ._EnableAsynchronousDecompression, ._EnableTemporalProcessing],
+                                          flags: flags,
                                           frameRefcon: nil,
                                           infoFlagsOut: &infoFlags)
-        print(infoFlags)
         guard status == kOSReturnSuccess else {
             throw OSStatusError(osStatus: status, description: "failed to decode frame \(sampleBuffer) info flags: \(infoFlags)")
         }
+        return infoFlags
     }
-    func canDecodeFormat(_ formatDescription: CMFormatDescription) -> Bool {
+    func canAcceptFormatDescription(_ formatDescription: CMFormatDescription) -> Bool {
         VTDecompressionSessionCanAcceptFormatDescription(session, formatDescription: formatDescription)
     }
 }
@@ -187,7 +188,7 @@ final class RTPH264Reciever {
                 self.formatDescription = formatDescription
                 if let newFormatDescription = formatDescription {
                     if let decoder = decoder {
-                        if !decoder.canDecodeFormat(newFormatDescription) {
+                        if !decoder.canAcceptFormatDescription(newFormatDescription) {
                             self.decoder = try VideoDecoder(formatDescription: newFormatDescription)
                         }
                     } else {
@@ -224,7 +225,7 @@ final class RTPH264Reciever {
             if let callback = callback {
                 callback(buffer)
             } else {
-                try self.decoder?.decode(sampleBuffer: buffer)
+                try self.decoder?.decodeFrame(sampleBuffer: buffer, flags: [._1xRealTimePlayback, ._EnableAsynchronousDecompression])
             }
         } catch {
             print(error)

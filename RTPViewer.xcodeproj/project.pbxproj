@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F071EDD2449EFCF00F8A054 /* RTPH264Sender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F071EDC2449EFCF00F8A054 /* RTPH264Sender.swift */; };
+		4F071EE52449F69000F8A054 /* SalesPerSecond(1).mov in Resources */ = {isa = PBXBuildFile; fileRef = 4F071EE42449F69000F8A054 /* SalesPerSecond(1).mov */; };
+		4F071EE72449FDF300F8A054 /* RepeatingTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F071EE62449FDF300F8A054 /* RepeatingTimer.swift */; };
 		4F4446A0244768E0005F8996 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 4F44469F244768E0005F8996 /* .gitignore */; };
 		4FACAEFE243F52E500F228A8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAEFD243F52E500F228A8 /* AppDelegate.swift */; };
 		4FACAF00243F52E500F228A8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAEFF243F52E500F228A8 /* ViewController.swift */; };
@@ -36,6 +39,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4F071EDC2449EFCF00F8A054 /* RTPH264Sender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPH264Sender.swift; sourceTree = "<group>"; };
+		4F071EE42449F69000F8A054 /* SalesPerSecond(1).mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "SalesPerSecond(1).mov"; sourceTree = "<group>"; };
+		4F071EE62449FDF300F8A054 /* RepeatingTimer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatingTimer.swift; sourceTree = "<group>"; };
 		4F44469F244768E0005F8996 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = .gitignore; path = ../SwiftRTP/.gitignore; sourceTree = "<group>"; };
 		4FACAEFA243F52E500F228A8 /* RTPViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RTPViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FACAEFD243F52E500F228A8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -106,6 +112,8 @@
 		4FACAEFC243F52E500F228A8 /* RTPViewer */ = {
 			isa = PBXGroup;
 			children = (
+				4F071EE62449FDF300F8A054 /* RepeatingTimer.swift */,
+				4F071EE42449F69000F8A054 /* SalesPerSecond(1).mov */,
 				4FACAEFD243F52E500F228A8 /* AppDelegate.swift */,
 				4FACAEFF243F52E500F228A8 /* ViewController.swift */,
 				4FACAF01243F52E600F228A8 /* Assets.xcassets */,
@@ -113,6 +121,7 @@
 				4FACAF06243F52E600F228A8 /* Info.plist */,
 				4FACAF07243F52E600F228A8 /* RTPViewer.entitlements */,
 				4FACAF2A2440D8E000F228A8 /* RTPH264Reciever.swift */,
+				4F071EDC2449EFCF00F8A054 /* RTPH264Sender.swift */,
 			);
 			path = RTPViewer;
 			sourceTree = "<group>";
@@ -251,6 +260,7 @@
 			files = (
 				4FACAF02243F52E600F228A8 /* Assets.xcassets in Resources */,
 				4F4446A0244768E0005F8996 /* .gitignore in Resources */,
+				4F071EE52449F69000F8A054 /* SalesPerSecond(1).mov in Resources */,
 				4FACAF05243F52E600F228A8 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -277,8 +287,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				4FACAF00243F52E500F228A8 /* ViewController.swift in Sources */,
+				4F071EDD2449EFCF00F8A054 /* RTPH264Sender.swift in Sources */,
 				4FACAEFE243F52E500F228A8 /* AppDelegate.swift in Sources */,
 				4FACAF2B2440D8E000F228A8 /* RTPH264Reciever.swift in Sources */,
+				4F071EE72449FDF300F8A054 /* RepeatingTimer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
