@@ -364,11 +364,11 @@ func sampleBufferFromNalu(_ nalu: H264.NALUnit<Data>, timestamp: UInt32, formatD
         throw OSStatusError(osStatus: result, description: "CMSampleBufferCreate() failed")
     }
     
-    if let attachmentsOfSampleBuffers = CMSampleBufferGetSampleAttachmentsArray(unwrapedSampleBuffer, createIfNecessary: true) as? [NSMutableDictionary] {
-        for attachments in attachmentsOfSampleBuffers {
-            attachments[kCMSampleAttachmentKey_DisplayImmediately] = NSNumber(value: true)
-        }
-    }
+//    if let attachmentsOfSampleBuffers = CMSampleBufferGetSampleAttachmentsArray(unwrapedSampleBuffer, createIfNecessary: true) as? [NSMutableDictionary] {
+//        for attachments in attachmentsOfSampleBuffers {
+//            attachments[kCMSampleAttachmentKey_DisplayImmediately] = NSNumber(value: true)
+//        }
+//    }
 
     return unwrapedSampleBuffer
 }

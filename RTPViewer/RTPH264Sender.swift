@@ -103,7 +103,7 @@ final class RTPH264Sender {
     private let timer: RepeatingTimer
     private let encoder: VideoEncoder
     private let output: AVPlayerItemVideoOutput
-    private let duration: CMTime
+    private let frameDuration: CMTime
     private let connection = NWConnection(to: .hostPort(host: "127.0.0.1", port: 1234), using: .udp)
     private var rtpSerialzer: RTPSerialzer
     private var h264Serialzer: H264.NALNonInterleavedPacketSerializer<Data>
@@ -113,11 +113,13 @@ final class RTPH264Sender {
         let track = asset.tracks(withMediaCharacteristic: .visual).first!
         let frameRate = track.nominalFrameRate
         let size = track.naturalSize
-        duration = CMTime(seconds: Double(1/frameRate), preferredTimescale: 60_000)
+        let duration = asset.duration.seconds
+        frameDuration = CMTime(seconds: Double(1/frameRate), preferredTimescale: 60_000)
         
         output = AVPlayerItemVideoOutput()
         item = AVPlayerItem(asset: asset)
         item.add(output)
+        
         
         player = AVPlayer(playerItem: item)
         
@@ -146,11 +148,17 @@ final class RTPH264Sender {
         }
         
         connection.start(queue: queue)
-        let timer = Timer.init(timeInterval: 1, repeats: false) { _ in
-            self.timer.resume()
+        let loopTimer = Timer.init(timeInterval: duration, repeats: true) { _ in
+            self.player.pause()
+            self.player.seek(to: .zero)
             self.player.play()
         }
-        RunLoop.main.add(timer, forMode: .common)
+        let startDelayTimer = Timer.init(timeInterval: 0.5, repeats: false) { _ in
+            self.timer.resume()
+            self.player.play()
+            RunLoop.main.add(loopTimer, forMode: .common)
+        }
+        RunLoop.main.add(startDelayTimer, forMode: .common)
     }
     private func eventHandler() {
         var displayTime = CMTime()
@@ -160,7 +168,7 @@ final class RTPH264Sender {
         }
         do {
             print("encode frame")
-            try encoder.encodeFrame(imageBuffer: buffer, presentationTimeStamp: displayTime, duration: duration, frameProperties: [:
+            try encoder.encodeFrame(imageBuffer: buffer, presentationTimeStamp: displayTime, duration: frameDuration, frameProperties: [:
                 //kVTEncodeFrameOptionKey_ForceKeyFrame: true,
             ])
         } catch {
@@ -200,7 +208,7 @@ final class RTPH264Sender {
             let parameterSet = formatDescription.h264ParameterSets()
             nalus.insert(contentsOf: parameterSet, at: 0)
         }
-        sendNalus(nalus, timestamp: UInt32(presentationTimeStamp.convertScale(90000, method: .default).value))
+        sendNalus(nalus, timestamp: UInt32(presentationTimeStamp.convertScale(90_000, method: .default).value))
         
     }
     private func sendNalus(_ nalus: [H264.NALUnit<Data>], timestamp: UInt32) {
