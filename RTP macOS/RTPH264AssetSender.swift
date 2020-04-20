@@ -15,8 +15,8 @@ import RTPAVKit
 import AVFoundation
 import Network
 
-final class RTPH264Sender {
-    private let queue = DispatchQueue(label: "de.nadoba.\(RTPH264Sender.self)")
+final class RTPH264AssetSender {
+    private let queue = DispatchQueue(label: "de.nadoba.\(RTPH264AssetSender.self)")
     private let item: AVPlayerItem
     private let player: AVPlayer
     private let timer: RepeatingTimer

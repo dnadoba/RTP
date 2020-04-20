@@ -26,7 +26,7 @@ class ViewController: NSViewController {
     var reciever: RTPH264Reciever?
     var videoView: VideoView { view as! VideoView }
     
-    var sender: RTPH264Sender?
+    var sender: RTPH264AssetSender?
     override func viewDidLoad() {
         super.viewDidLoad()
         reciever = RTPH264Reciever(host: "127.0.0.1", port: 1234)
@@ -39,7 +39,7 @@ class ViewController: NSViewController {
         NotificationCenter.default.addObserver(forName: .AVSampleBufferDisplayLayerFailedToDecode, object: videoView.displayLayer, queue: .main) { (notification) in
             print(notification)
         }
-        sender = RTPH264Sender()
+        sender = RTPH264AssetSender()
     }
 
     override var representedObject: Any? {
