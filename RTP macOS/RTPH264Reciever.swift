@@ -93,22 +93,7 @@ final class RTPH264Reciever {
     }
     
     func scheduleReciveMessage(connection: NWConnection) {
-//        connection.receive(minimumIncompleteLength: 1, maximumLength: Int(UInt32.max)) { [weak self] (data, context, isComplete, error) in
-//            guard let self = self else { return }
-//            defer {
-//                self.scheduleReciveMessage(connection: connection)
-//            }
-//            guard isComplete else { return }
-//            if let error = error {
-//                print(error)
-//                return
-//            }
-//            guard let data = data else {
-//                print("recive message is complete and no error but also no data")
-//                return
-//            }
-//            self.didReciveData(data)
-//        }
+
         connection.receiveMessage { [weak self] (data, context, isComplete, error) in
             guard let self = self else { return }
             defer {
