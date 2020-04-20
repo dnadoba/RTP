@@ -39,7 +39,7 @@ class ViewController: NSViewController {
         NotificationCenter.default.addObserver(forName: .AVSampleBufferDisplayLayerFailedToDecode, object: videoView.displayLayer, queue: .main) { (notification) in
             print(notification)
         }
-        sender = RTPH264AssetSender()
+        sender = RTPH264AssetSender(endpoint: .hostPort(host: "127.0.0.1", port: 1234))
     }
 
     override var representedObject: Any? {
