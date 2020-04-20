@@ -178,7 +178,7 @@ extension CMFormatDescription {
                 var size = 0
                 CMVideoFormatDescriptionGetH264ParameterSetAtIndex(self, parameterSetIndex: index, parameterSetPointerOut: &pointerOut, parameterSetSizeOut: &size, parameterSetCountOut: nil, nalUnitHeaderLengthOut: nil)
                 if let pointerOut = pointerOut {
-                    let data = D(UnsafeBufferPointer(start: pointerOut, count: size))
+                    let data = UnsafeBufferPointer(start: pointerOut, count: size)
                     var reader = BinaryReader(bytes: data)
                     let nalu = H264.NALUnit(header: try .init(from: &reader), payload: D(try reader.readRemainingBytes()))
                     nalus.append(nalu)
