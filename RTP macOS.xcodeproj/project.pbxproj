@@ -50,7 +50,7 @@
 		4FACAF01243F52E600F228A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4FACAF04243F52E600F228A8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4FACAF06243F52E600F228A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4FACAF07243F52E600F228A8 /* RTPViewer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RTPViewer.entitlements; sourceTree = "<group>"; };
+		4FACAF07243F52E600F228A8 /* RTP macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "RTP macOS.entitlements"; sourceTree = "<group>"; };
 		4FACAF0C243F52E700F228A8 /* RTP macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RTP macOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FACAF10243F52E700F228A8 /* RTPViewerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPViewerTests.swift; sourceTree = "<group>"; };
 		4FACAF12243F52E700F228A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -91,9 +91,9 @@
 			isa = PBXGroup;
 			children = (
 				4F44469F244768E0005F8996 /* .gitignore */,
-				4FACAEFC243F52E500F228A8 /* RTPViewer */,
-				4FACAF0F243F52E700F228A8 /* RTPViewerTests */,
-				4FACAF1A243F52E700F228A8 /* RTPViewerUITests */,
+				4FACAEFC243F52E500F228A8 /* RTP macOS */,
+				4FACAF0F243F52E700F228A8 /* RTP macOSTests */,
+				4FACAF1A243F52E700F228A8 /* RTP macOSUITests */,
 				4FACAEFB243F52E500F228A8 /* Products */,
 				4FACAF2C2440D91700F228A8 /* Frameworks */,
 			);
@@ -109,7 +109,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4FACAEFC243F52E500F228A8 /* RTPViewer */ = {
+		4FACAEFC243F52E500F228A8 /* RTP macOS */ = {
 			isa = PBXGroup;
 			children = (
 				4F071EE62449FDF300F8A054 /* RepeatingTimer.swift */,
@@ -119,29 +119,29 @@
 				4FACAF01243F52E600F228A8 /* Assets.xcassets */,
 				4FACAF03243F52E600F228A8 /* Main.storyboard */,
 				4FACAF06243F52E600F228A8 /* Info.plist */,
-				4FACAF07243F52E600F228A8 /* RTPViewer.entitlements */,
+				4FACAF07243F52E600F228A8 /* RTP macOS.entitlements */,
 				4FACAF2A2440D8E000F228A8 /* RTPH264Reciever.swift */,
 				4F071EDC2449EFCF00F8A054 /* RTPH264Sender.swift */,
 			);
-			path = RTPViewer;
+			path = "RTP macOS";
 			sourceTree = "<group>";
 		};
-		4FACAF0F243F52E700F228A8 /* RTPViewerTests */ = {
+		4FACAF0F243F52E700F228A8 /* RTP macOSTests */ = {
 			isa = PBXGroup;
 			children = (
 				4FACAF10243F52E700F228A8 /* RTPViewerTests.swift */,
 				4FACAF12243F52E700F228A8 /* Info.plist */,
 			);
-			path = RTPViewerTests;
+			path = "RTP macOSTests";
 			sourceTree = "<group>";
 		};
-		4FACAF1A243F52E700F228A8 /* RTPViewerUITests */ = {
+		4FACAF1A243F52E700F228A8 /* RTP macOSUITests */ = {
 			isa = PBXGroup;
 			children = (
 				4FACAF1B243F52E700F228A8 /* RTPViewerUITests.swift */,
 				4FACAF1D243F52E700F228A8 /* Info.plist */,
 			);
-			path = RTPViewerUITests;
+			path = "RTP macOSUITests";
 			sourceTree = "<group>";
 		};
 		4FACAF2C2440D91700F228A8 /* Frameworks */ = {
@@ -455,17 +455,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = RTPViewer/RTPViewer.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "RTP macOS/RTP macOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = XKQRPFVM7Z;
 				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = RTPViewer/Info.plist;
+				INFOPLIST_FILE = "RTP macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = de.nadoba.RTPViewer;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.nadoba.RTP-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -475,17 +475,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = RTPViewer/RTPViewer.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "RTP macOS/RTP macOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = XKQRPFVM7Z;
 				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = RTPViewer/Info.plist;
+				INFOPLIST_FILE = "RTP macOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = de.nadoba.RTPViewer;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.nadoba.RTP-macOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
