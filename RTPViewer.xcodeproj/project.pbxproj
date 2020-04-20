@@ -11,6 +11,8 @@
 		4F071EE52449F69000F8A054 /* SalesPerSecond(1).mov in Resources */ = {isa = PBXBuildFile; fileRef = 4F071EE42449F69000F8A054 /* SalesPerSecond(1).mov */; };
 		4F071EE72449FDF300F8A054 /* RepeatingTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F071EE62449FDF300F8A054 /* RepeatingTimer.swift */; };
 		4F4446A0244768E0005F8996 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 4F44469F244768E0005F8996 /* .gitignore */; };
+		4F7E23D6244DB0DB00ABC133 /* SwiftRTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D5244DB0DB00ABC133 /* SwiftRTP */; };
+		4F7E23D8244DB0E000ABC133 /* BinaryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D7244DB0E000ABC133 /* BinaryKit */; };
 		4FACAEFE243F52E500F228A8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAEFD243F52E500F228A8 /* AppDelegate.swift */; };
 		4FACAF00243F52E500F228A8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAEFF243F52E500F228A8 /* ViewController.swift */; };
 		4FACAF02243F52E600F228A8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4FACAF01243F52E600F228A8 /* Assets.xcassets */; };
@@ -18,7 +20,6 @@
 		4FACAF11243F52E700F228A8 /* RTPViewerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAF10243F52E700F228A8 /* RTPViewerTests.swift */; };
 		4FACAF1C243F52E700F228A8 /* RTPViewerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAF1B243F52E700F228A8 /* RTPViewerUITests.swift */; };
 		4FACAF2B2440D8E000F228A8 /* RTPH264Reciever.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAF2A2440D8E000F228A8 /* RTPH264Reciever.swift */; };
-		4FACAF2E2440D91700F228A8 /* SwiftRTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4FACAF2D2440D91700F228A8 /* SwiftRTP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,7 +57,6 @@
 		4FACAF17243F52E700F228A8 /* RTPViewerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RTPViewerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FACAF1B243F52E700F228A8 /* RTPViewerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPViewerUITests.swift; sourceTree = "<group>"; };
 		4FACAF1D243F52E700F228A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4FACAF29243F537B00F228A8 /* SwiftRTP */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SwiftRTP; path = ../SwiftRTP; sourceTree = "<group>"; };
 		4FACAF2A2440D8E000F228A8 /* RTPH264Reciever.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPH264Reciever.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -65,7 +65,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4FACAF2E2440D91700F228A8 /* SwiftRTP in Frameworks */,
+				4F7E23D8244DB0E000ABC133 /* BinaryKit in Frameworks */,
+				4F7E23D6244DB0DB00ABC133 /* SwiftRTP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,7 +91,6 @@
 			isa = PBXGroup;
 			children = (
 				4F44469F244768E0005F8996 /* .gitignore */,
-				4FACAF29243F537B00F228A8 /* SwiftRTP */,
 				4FACAEFC243F52E500F228A8 /* RTPViewer */,
 				4FACAF0F243F52E700F228A8 /* RTPViewerTests */,
 				4FACAF1A243F52E700F228A8 /* RTPViewerUITests */,
@@ -168,7 +168,8 @@
 			);
 			name = RTPViewer;
 			packageProductDependencies = (
-				4FACAF2D2440D91700F228A8 /* SwiftRTP */,
+				4F7E23D5244DB0DB00ABC133 /* SwiftRTP */,
+				4F7E23D7244DB0E000ABC133 /* BinaryKit */,
 			);
 			productName = RTPViewer;
 			productReference = 4FACAEFA243F52E500F228A8 /* RTPViewer.app */;
@@ -616,9 +617,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		4FACAF2D2440D91700F228A8 /* SwiftRTP */ = {
+		4F7E23D5244DB0DB00ABC133 /* SwiftRTP */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SwiftRTP;
+		};
+		4F7E23D7244DB0E000ABC133 /* BinaryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BinaryKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

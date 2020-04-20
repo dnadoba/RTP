@@ -7,7 +7,25 @@
 		<key>RTPViewer.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>4FACAEF9243F52E500F228A8</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4FACAF0B243F52E700F228A8</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4FACAF16243F52E700F228A8</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

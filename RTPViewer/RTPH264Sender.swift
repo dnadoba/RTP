@@ -221,6 +221,7 @@ final class RTPH264Sender {
                 for packet in packets {
                     do {
                         let data: Data = try rtpSerialzer.serialze(packet)
+                        print("size of packet", data.count, "maximumDatagramSize", connection.maximumDatagramSize)
                         connection.send(content: data, completion: .idempotent)
                     } catch {
                         print(error)
