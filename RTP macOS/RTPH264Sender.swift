@@ -10,92 +10,11 @@ import Foundation
 import VideoToolbox
 import SwiftRTP
 import BinaryKit
-
-enum VideoCodec {
-    case h264
-    case h265
-    case h265WithAlpha
-}
-
-extension VideoCodec {
-    var codecType: CMVideoCodecType {
-        switch self {
-        case .h264: return kCMVideoCodecType_H264
-        case .h265: return kCMVideoCodecType_HEVC
-        case .h265WithAlpha: return kCMVideoCodecType_HEVCWithAlpha
-        }
-    }
-}
-
-final class VideoEncoder {
-    typealias Callback = (CMSampleBuffer, VTEncodeInfoFlags) -> ()
-    var callback: Callback?
-    private var session: VTCompressionSession!
-    init(
-        allocator: CFAllocator? = nil,
-        width: Int,
-        height: Int,
-        codec: VideoCodec,
-        encoderSpecification: NSDictionary?,
-        imageBufferAttributes: NSDictionary?,
-        compressedDataAllocator: CFAllocator? = nil
-    ) throws {
-        let ptr = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-
-        //            let mutablePointer = UnsafeMutableRawPointer.allocate(byteCount: MemoryLayout<VideoEncoder>.size, alignment: MemoryLayout<VideoEncoder>.alignment)
-        //            defer { mutablePointer.deallocate() }
-        //            mutablePointer.initializeMemory(as: VideoEncoder.self, from: selfPointer, count: 1)
-        var session: VTCompressionSession?
-        let status = VTCompressionSessionCreate(
-            allocator: allocator,
-            width: Int32(width),
-            height: Int32(height),
-            codecType: codec.codecType,
-            encoderSpecification: encoderSpecification,
-            imageBufferAttributes: imageBufferAttributes,
-            compressedDataAllocator: compressedDataAllocator,
-            outputCallback: { (selfPointer, _, status, infoFlags, sampleBuffer) in
-                let mySelf = Unmanaged<VideoEncoder>.fromOpaque(UnsafeRawPointer(selfPointer!)).takeUnretainedValue()
-                guard status == kOSReturnSuccess, let sampleBuffer = sampleBuffer else {
-                    print(OSStatusError(osStatus: status, description: "failed to compress frame"))
-                    return
-                }
-                
-                mySelf.callback?(sampleBuffer, infoFlags)
-                
-        }, refcon: ptr, compressionSessionOut: &session)
-        
-        guard status == kOSReturnSuccess, let unwrapedSession = session else {
-            throw OSStatusError(osStatus: status, description: "failed to create \(VTCompressionSession.self) width: \(width) height: \(height) codec: \(codec) encoderSpecification: \(encoderSpecification as Any) imageBufferAttributes: \(imageBufferAttributes as Any)")
-        }
-        self.session = unwrapedSession
-        
-    }
-    deinit {
-        print("deinit")
-        if let session = session {
-            VTCompressionSessionInvalidate(session)
-        }
-    }
-    @discardableResult
-    func encodeFrame(
-        imageBuffer: CVImageBuffer,
-        presentationTimeStamp: CMTime,
-        duration: CMTime,
-        frameProperties: NSDictionary? = nil
-    ) throws -> VTEncodeInfoFlags {
-        var infoFlags = VTEncodeInfoFlags()
-        
-        let status = VTCompressionSessionEncodeFrame(session, imageBuffer: imageBuffer, presentationTimeStamp: presentationTimeStamp, duration: duration, frameProperties: frameProperties, sourceFrameRefcon: nil, infoFlagsOut: &infoFlags)
-        guard status == kOSReturnSuccess else {
-            throw OSStatusError(osStatus: status, description: "failed to encode frame \(imageBuffer) presentationTimeStamp: \(presentationTimeStamp) duration\(duration) frameProperties \(frameProperties as Any) info flags: \(infoFlags)")
-        }
-        return infoFlags
-    }
-}
+import RTPAVKit
 
 import AVFoundation
 import Network
+
 final class RTPH264Sender {
     private let queue = DispatchQueue(label: "de.nadoba.\(RTPH264Sender.self)")
     private let item: AVPlayerItem

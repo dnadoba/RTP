@@ -11,6 +11,7 @@
 		4F071EE52449F69000F8A054 /* SalesPerSecond(1).mov in Resources */ = {isa = PBXBuildFile; fileRef = 4F071EE42449F69000F8A054 /* SalesPerSecond(1).mov */; };
 		4F071EE72449FDF300F8A054 /* RepeatingTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F071EE62449FDF300F8A054 /* RepeatingTimer.swift */; };
 		4F4446A0244768E0005F8996 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 4F44469F244768E0005F8996 /* .gitignore */; };
+		4F4CB337244DCCB40021B1A3 /* RTPAVKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F4CB336244DCCB40021B1A3 /* RTPAVKit */; };
 		4F7E23D6244DB0DB00ABC133 /* SwiftRTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D5244DB0DB00ABC133 /* SwiftRTP */; };
 		4F7E23D8244DB0E000ABC133 /* BinaryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D7244DB0E000ABC133 /* BinaryKit */; };
 		4FACAEFE243F52E500F228A8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAEFD243F52E500F228A8 /* AppDelegate.swift */; };
@@ -67,6 +68,7 @@
 			files = (
 				4F7E23D8244DB0E000ABC133 /* BinaryKit in Frameworks */,
 				4F7E23D6244DB0DB00ABC133 /* SwiftRTP in Frameworks */,
+				4F4CB337244DCCB40021B1A3 /* RTPAVKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,6 +172,7 @@
 			packageProductDependencies = (
 				4F7E23D5244DB0DB00ABC133 /* SwiftRTP */,
 				4F7E23D7244DB0E000ABC133 /* BinaryKit */,
+				4F4CB336244DCCB40021B1A3 /* RTPAVKit */,
 			);
 			productName = RTPViewer;
 			productReference = 4FACAEFA243F52E500F228A8 /* RTP macOS.app */;
@@ -617,6 +620,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4F4CB336244DCCB40021B1A3 /* RTPAVKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RTPAVKit;
+		};
 		4F7E23D5244DB0DB00ABC133 /* SwiftRTP */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SwiftRTP;

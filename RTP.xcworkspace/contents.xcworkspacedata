@@ -8,9 +8,12 @@
       location = "group:../SwiftRTP">
    </FileRef>
    <FileRef
+      location = "group:../RTPAVKit">
+   </FileRef>
+   <FileRef
       location = "group:RTP iOS/RTP iOS.xcodeproj">
    </FileRef>
    <FileRef
-      location = "container:/Users/davidnadoba/Repositories/RTPViewer/RTP macOS.xcodeproj">
+      location = "container:RTP macOS.xcodeproj">
    </FileRef>
 </Workspace>

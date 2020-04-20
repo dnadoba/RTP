@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F4CB339244DCCBC0021B1A3 /* RTPAVKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F4CB338244DCCBC0021B1A3 /* RTPAVKit */; };
 		4F7E23D2244DB0CB00ABC133 /* SwiftRTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D1244DB0CB00ABC133 /* SwiftRTP */; };
 		4F7E23D4244DB0D000ABC133 /* BinaryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D3244DB0D000ABC133 /* BinaryKit */; };
 		4FBA333A244DAC98006CA662 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBA3339244DAC98006CA662 /* AppDelegate.swift */; };
@@ -60,6 +61,7 @@
 			files = (
 				4F7E23D4244DB0D000ABC133 /* BinaryKit in Frameworks */,
 				4F7E23D2244DB0CB00ABC133 /* SwiftRTP in Frameworks */,
+				4F4CB339244DCCBC0021B1A3 /* RTPAVKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,6 +161,7 @@
 			packageProductDependencies = (
 				4F7E23D1244DB0CB00ABC133 /* SwiftRTP */,
 				4F7E23D3244DB0D000ABC133 /* BinaryKit */,
+				4F4CB338244DCCBC0021B1A3 /* RTPAVKit */,
 			);
 			productName = "RTP iOS";
 			productReference = 4FBA3336244DAC98006CA662 /* RTP iOS.app */;
@@ -608,6 +611,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4F4CB338244DCCBC0021B1A3 /* RTPAVKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RTPAVKit;
+		};
 		4F7E23D1244DB0CB00ABC133 /* SwiftRTP */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SwiftRTP;
