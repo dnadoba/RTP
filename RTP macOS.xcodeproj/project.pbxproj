@@ -44,17 +44,17 @@
 		4F071EE42449F69000F8A054 /* SalesPerSecond(1).mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "SalesPerSecond(1).mov"; sourceTree = "<group>"; };
 		4F071EE62449FDF300F8A054 /* RepeatingTimer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatingTimer.swift; sourceTree = "<group>"; };
 		4F44469F244768E0005F8996 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = .gitignore; path = ../SwiftRTP/.gitignore; sourceTree = "<group>"; };
-		4FACAEFA243F52E500F228A8 /* RTPViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RTPViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FACAEFA243F52E500F228A8 /* RTP macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RTP macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FACAEFD243F52E500F228A8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4FACAEFF243F52E500F228A8 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		4FACAF01243F52E600F228A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4FACAF04243F52E600F228A8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4FACAF06243F52E600F228A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4FACAF07243F52E600F228A8 /* RTPViewer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RTPViewer.entitlements; sourceTree = "<group>"; };
-		4FACAF0C243F52E700F228A8 /* RTPViewerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RTPViewerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FACAF0C243F52E700F228A8 /* RTP macOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RTP macOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FACAF10243F52E700F228A8 /* RTPViewerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPViewerTests.swift; sourceTree = "<group>"; };
 		4FACAF12243F52E700F228A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4FACAF17243F52E700F228A8 /* RTPViewerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RTPViewerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FACAF17243F52E700F228A8 /* RTP macOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RTP macOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FACAF1B243F52E700F228A8 /* RTPViewerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPViewerUITests.swift; sourceTree = "<group>"; };
 		4FACAF1D243F52E700F228A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4FACAF2A2440D8E000F228A8 /* RTPH264Reciever.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPH264Reciever.swift; sourceTree = "<group>"; };
@@ -102,9 +102,9 @@
 		4FACAEFB243F52E500F228A8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4FACAEFA243F52E500F228A8 /* RTPViewer.app */,
-				4FACAF0C243F52E700F228A8 /* RTPViewerTests.xctest */,
-				4FACAF17243F52E700F228A8 /* RTPViewerUITests.xctest */,
+				4FACAEFA243F52E500F228A8 /* RTP macOS.app */,
+				4FACAF0C243F52E700F228A8 /* RTP macOSTests.xctest */,
+				4FACAF17243F52E700F228A8 /* RTP macOSUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -154,9 +154,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4FACAEF9243F52E500F228A8 /* RTPViewer */ = {
+		4FACAEF9243F52E500F228A8 /* RTP macOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4FACAF20243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTPViewer" */;
+			buildConfigurationList = 4FACAF20243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTP macOS" */;
 			buildPhases = (
 				4FACAEF6243F52E500F228A8 /* Sources */,
 				4FACAEF7243F52E500F228A8 /* Frameworks */,
@@ -166,18 +166,18 @@
 			);
 			dependencies = (
 			);
-			name = RTPViewer;
+			name = "RTP macOS";
 			packageProductDependencies = (
 				4F7E23D5244DB0DB00ABC133 /* SwiftRTP */,
 				4F7E23D7244DB0E000ABC133 /* BinaryKit */,
 			);
 			productName = RTPViewer;
-			productReference = 4FACAEFA243F52E500F228A8 /* RTPViewer.app */;
+			productReference = 4FACAEFA243F52E500F228A8 /* RTP macOS.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4FACAF0B243F52E700F228A8 /* RTPViewerTests */ = {
+		4FACAF0B243F52E700F228A8 /* RTP macOSTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4FACAF23243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTPViewerTests" */;
+			buildConfigurationList = 4FACAF23243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTP macOSTests" */;
 			buildPhases = (
 				4FACAF08243F52E700F228A8 /* Sources */,
 				4FACAF09243F52E700F228A8 /* Frameworks */,
@@ -188,14 +188,14 @@
 			dependencies = (
 				4FACAF0E243F52E700F228A8 /* PBXTargetDependency */,
 			);
-			name = RTPViewerTests;
+			name = "RTP macOSTests";
 			productName = RTPViewerTests;
-			productReference = 4FACAF0C243F52E700F228A8 /* RTPViewerTests.xctest */;
+			productReference = 4FACAF0C243F52E700F228A8 /* RTP macOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		4FACAF16243F52E700F228A8 /* RTPViewerUITests */ = {
+		4FACAF16243F52E700F228A8 /* RTP macOSUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4FACAF26243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTPViewerUITests" */;
+			buildConfigurationList = 4FACAF26243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTP macOSUITests" */;
 			buildPhases = (
 				4FACAF13243F52E700F228A8 /* Sources */,
 				4FACAF14243F52E700F228A8 /* Frameworks */,
@@ -206,9 +206,9 @@
 			dependencies = (
 				4FACAF19243F52E700F228A8 /* PBXTargetDependency */,
 			);
-			name = RTPViewerUITests;
+			name = "RTP macOSUITests";
 			productName = RTPViewerUITests;
-			productReference = 4FACAF17243F52E700F228A8 /* RTPViewerUITests.xctest */;
+			productReference = 4FACAF17243F52E700F228A8 /* RTP macOSUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -234,7 +234,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 4FACAEF5243F52E500F228A8 /* Build configuration list for PBXProject "RTPViewer" */;
+			buildConfigurationList = 4FACAEF5243F52E500F228A8 /* Build configuration list for PBXProject "RTP macOS" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -247,9 +247,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4FACAEF9243F52E500F228A8 /* RTPViewer */,
-				4FACAF0B243F52E700F228A8 /* RTPViewerTests */,
-				4FACAF16243F52E700F228A8 /* RTPViewerUITests */,
+				4FACAEF9243F52E500F228A8 /* RTP macOS */,
+				4FACAF0B243F52E700F228A8 /* RTP macOSTests */,
+				4FACAF16243F52E700F228A8 /* RTP macOSUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -316,12 +316,12 @@
 /* Begin PBXTargetDependency section */
 		4FACAF0E243F52E700F228A8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4FACAEF9243F52E500F228A8 /* RTPViewer */;
+			target = 4FACAEF9243F52E500F228A8 /* RTP macOS */;
 			targetProxy = 4FACAF0D243F52E700F228A8 /* PBXContainerItemProxy */;
 		};
 		4FACAF19243F52E700F228A8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4FACAEF9243F52E500F228A8 /* RTPViewer */;
+			target = 4FACAEF9243F52E500F228A8 /* RTP macOS */;
 			targetProxy = 4FACAF18243F52E700F228A8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -509,7 +509,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = de.nadoba.RTPViewerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RTPViewer.app/Contents/MacOS/RTPViewer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RTP macOS.app/Contents/MacOS/RTP macOS";
 			};
 			name = Debug;
 		};
@@ -531,7 +531,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = de.nadoba.RTPViewerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RTPViewer.app/Contents/MacOS/RTPViewer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RTP macOS.app/Contents/MacOS/RTP macOS";
 			};
 			name = Release;
 		};
@@ -578,7 +578,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4FACAEF5243F52E500F228A8 /* Build configuration list for PBXProject "RTPViewer" */ = {
+		4FACAEF5243F52E500F228A8 /* Build configuration list for PBXProject "RTP macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4FACAF1E243F52E700F228A8 /* Debug */,
@@ -587,7 +587,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4FACAF20243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTPViewer" */ = {
+		4FACAF20243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTP macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4FACAF21243F52E700F228A8 /* Debug */,
@@ -596,7 +596,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4FACAF23243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTPViewerTests" */ = {
+		4FACAF23243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTP macOSTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4FACAF24243F52E700F228A8 /* Debug */,
@@ -605,7 +605,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4FACAF26243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTPViewerUITests" */ = {
+		4FACAF26243F52E700F228A8 /* Build configuration list for PBXNativeTarget "RTP macOSUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4FACAF27243F52E700F228A8 /* Debug */,
