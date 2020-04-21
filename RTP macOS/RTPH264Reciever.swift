@@ -69,7 +69,7 @@ final class RTPH264Reciever {
     var callback: Callback?
     init(host: NWEndpoint.Host, port: NWEndpoint.Port) {
         let parameters = NWParameters.udp
-        parameters.requiredLocalEndpoint = NWEndpoint.hostPort(host: host, port: port)
+        parameters.requiredLocalEndpoint = NWEndpoint.hostPort(host: "0.0.0.0", port: port)
         listen = try! NWListener(using: parameters)
         
 //        connection.stateUpdateHandler = {
@@ -321,8 +321,8 @@ func sampleBufferFromNalu(_ nalu: H264.NALUnit<Data>, timestamp: UInt32, formatD
     // Computer the duration and time
     let duration = CMTime.invalid // CMTimeMake(3000, H264ClockRate) // TODO: 1/30th of a second. Making this up.
 
-    let time = CMTime(value: Int64(timestamp), timescale: h264ClockRate)
-    //let time = CMClockGetHostTimeClock().time
+    //let time = CMTime(value: Int64(timestamp), timescale: h264ClockRate)
+    let time = CMClockGetHostTimeClock().time
     // Inputs to CMSampleBufferCreate
     let timingInfo: [CMSampleTimingInfo] = [CMSampleTimingInfo(duration: duration, presentationTimeStamp: time, decodeTimeStamp: time)]
     let sampleSizes: [Int] = [CMBlockBufferGetDataLength(blockBuffer)]

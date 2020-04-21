@@ -8,52 +8,90 @@
 
 import UIKit
 import AVFoundation
+import RTPAVKit
+import Network
 
-final class CaptureSession: NSObject {
+extension AVCaptureSession {
+    func configure<Result>(_ configure: (AVCaptureSession) throws -> Result) rethrows -> Result {
+        self.beginConfiguration()
+        defer { self.commitConfiguration() }
+        return try configure(self)
+    }
+}
+
+final class CaptureSession {
     enum Error: Swift.Error {
         case couldNoGetCaptureDevice
     }
     let session = AVCaptureSession()
-    let output = AVCaptureVideoDataOutput()
-    let sampleQueue = DispatchQueue(label: "de.nadoba.\(CaptureSession.self)", qos: .userInteractive)
-    override init() {
-        super.init()
-        output.setSampleBufferDelegate(self, queue: sampleQueue)
-    }
+    
     func setup() throws {
         guard let cameraDevice = AVCaptureDevice.default(for: .video) else {
             throw Error.couldNoGetCaptureDevice
         }
         let camerInput = try AVCaptureDeviceInput(device: cameraDevice)
         
-        session.beginConfiguration()
-        defer { session.commitConfiguration() }
-        
-        session.addInput(camerInput)
-        session.addOutput(output)
-        session.sessionPreset = .high
+        session.configure {
+            $0.addInput(camerInput)
+            $0.sessionPreset = .high
+        }
     }
-    func start() {
+    func start() throws {
         session.startRunning()
     }
 }
 
-extension CaptureSession: AVCaptureVideoDataOutputSampleBufferDelegate {
+final class VideoSessionController: NSObject {
+    let output = AVCaptureVideoDataOutput()
+    let sampleQueue = DispatchQueue(label: "de.nadoba.\(CaptureSession.self)", qos: .userInteractive)
+    private let sender: RTPH264Sender
+    let captureSession: CaptureSession = .init()
+    init(endpoint: NWEndpoint) {
+        sender = RTPH264Sender(endpoint: endpoint, targetQueue: sampleQueue)
+        super.init()
+        captureSession.session.configure {
+            $0.addOutput(output)
+        }
+        
+        output.setSampleBufferDelegate(self, queue: sampleQueue)
+    }
+    
+    func setup() throws {
+        try captureSession.setup()
+    }
+    func start() throws {
+        try captureSession.start()
+    }
+}
+
+extension VideoSessionController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         print("did drop sample buffer")
     }
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        
+        let presentationTime = sampleBuffer.presentationTimeStamp
+        guard let image = sampleBuffer.imageBuffer else { return }
+        sender.encodeAndSendFrame(image, presentationTimeStamp: presentationTime, frameDuration: .invalid)
     }
 }
 
+class PreviewView: UIView {
+    override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
+    var previewLayer: AVCaptureVideoPreviewLayer { self.layer as! AVCaptureVideoPreviewLayer }
+}
+
 class ViewController: UIViewController {
-    let captureSession = CaptureSession()
+    let videoController = VideoSessionController(endpoint: .hostPort(host: "davids-macbook-pro.local", port: 1234))
+    var previewView: PreviewView { self.view as! PreviewView }
     override func viewDidLoad() {
         super.viewDidLoad()
-        captureSession.start()
+        previewView.previewLayer.session = videoController.captureSession.session
+        do {
+            try videoController.setup()
+            try videoController.start()
+        } catch {
+            print(error, #file, #line)
+        }
     }
-
-
 }
 
