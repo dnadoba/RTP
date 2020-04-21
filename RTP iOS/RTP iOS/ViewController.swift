@@ -80,18 +80,42 @@ class PreviewView: UIView {
     var previewLayer: AVCaptureVideoPreviewLayer { self.layer as! AVCaptureVideoPreviewLayer }
 }
 
+extension UIDeviceOrientation {
+    var avOrientation: AVCaptureVideoOrientation {
+        switch self {
+        case .landscapeLeft:
+            return .landscapeLeft
+        case .landscapeRight:
+            return .landscapeRight
+        case .portraitUpsideDown:
+            return .portraitUpsideDown
+        default:
+            return .portrait
+        }
+    }
+}
+
 class ViewController: UIViewController {
-    let videoController = VideoSessionController(endpoint: .hostPort(host: "davids-macbook-pro.local", port: 1234))
-    var previewView: PreviewView { self.view as! PreviewView }
+    let videoController = VideoSessionController(endpoint: .hostPort(host: "192.168.188.29", port: 1234))
+    var preview: PreviewView { self.view as! PreviewView }
     override func viewDidLoad() {
         super.viewDidLoad()
-        previewView.previewLayer.session = videoController.captureSession.session
+        preview.previewLayer.session = videoController.captureSession.session
         do {
             try videoController.setup()
             try videoController.start()
         } catch {
             print(error, #file, #line)
         }
+    }
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        coordinator.animate(alongsideTransition: { (context) -> Void in
+            self.preview.previewLayer.connection?.videoOrientation = UIDevice.current.orientation.avOrientation
+            self.preview.previewLayer.frame.size = self.preview.frame.size
+            }, completion: { (context) -> Void in
+                
+        })
+        super.viewWillTransition(to: size, with: coordinator)
     }
 }
 
