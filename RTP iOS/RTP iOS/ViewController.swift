@@ -113,6 +113,8 @@ class ViewController: UIViewController {
         super.viewWillAppear(animated)
     }
     private func updateVideoOrientation() {
+        // UIApplication.shared.statusBarOrientation is deprecated but I could not find an alternativ
+        // UIDevice.current.orientation does not work as expected on startup
         preview.previewLayer.connection?.videoOrientation = UIApplication.shared.statusBarOrientation.av
     }
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
