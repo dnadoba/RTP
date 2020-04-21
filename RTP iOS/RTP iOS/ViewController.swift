@@ -79,9 +79,8 @@ class PreviewView: UIView {
     override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
     var previewLayer: AVCaptureVideoPreviewLayer { self.layer as! AVCaptureVideoPreviewLayer }
 }
-
-extension UIDeviceOrientation {
-    var avOrientation: AVCaptureVideoOrientation {
+extension UIInterfaceOrientation {
+    var av: AVCaptureVideoOrientation {
         switch self {
         case .landscapeLeft:
             return .landscapeLeft
@@ -94,6 +93,7 @@ extension UIDeviceOrientation {
         }
     }
 }
+
 
 class ViewController: UIViewController {
     let videoController = VideoSessionController(endpoint: .hostPort(host: "192.168.188.29", port: 1234))
@@ -108,12 +108,16 @@ class ViewController: UIViewController {
             print(error, #file, #line)
         }
     }
+    override func viewWillAppear(_ animated: Bool) {
+        updateVideoOrientation()
+        super.viewWillAppear(animated)
+    }
+    private func updateVideoOrientation() {
+        preview.previewLayer.connection?.videoOrientation = UIApplication.shared.statusBarOrientation.av
+    }
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         coordinator.animate(alongsideTransition: { (context) -> Void in
-            self.preview.previewLayer.connection?.videoOrientation = UIDevice.current.orientation.avOrientation
-            self.preview.previewLayer.frame.size = self.preview.frame.size
-            }, completion: { (context) -> Void in
-                
+            self.updateVideoOrientation()
         })
         super.viewWillTransition(to: size, with: coordinator)
     }
