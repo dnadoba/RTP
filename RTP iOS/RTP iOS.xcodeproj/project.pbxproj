@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F48047C245066B100BFF914 /* CameraSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F48047B245066B100BFF914 /* CameraSettings.swift */; };
+		4F48047E2450735B00BFF914 /* CameraSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F48047D2450735B00BFF914 /* CameraSelectionViewController.swift */; };
+		4F48048024507F1B00BFF914 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F48047F24507F1B00BFF914 /* CameraPicker.swift */; };
+		4F4804822450832200BFF914 /* CameraFormatPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F4804812450832200BFF914 /* CameraFormatPicker.swift */; };
 		4F4CB339244DCCBC0021B1A3 /* RTPAVKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F4CB338244DCCBC0021B1A3 /* RTPAVKit */; };
 		4F7E23D2244DB0CB00ABC133 /* SwiftRTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D1244DB0CB00ABC133 /* SwiftRTP */; };
 		4F7E23D4244DB0D000ABC133 /* BinaryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D3244DB0D000ABC133 /* BinaryKit */; };
@@ -38,6 +42,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4F48047B245066B100BFF914 /* CameraSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSettings.swift; sourceTree = "<group>"; };
+		4F48047D2450735B00BFF914 /* CameraSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSelectionViewController.swift; sourceTree = "<group>"; };
+		4F48047F24507F1B00BFF914 /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
+		4F4804812450832200BFF914 /* CameraFormatPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFormatPicker.swift; sourceTree = "<group>"; };
 		4FBA3336244DAC98006CA662 /* RTP iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RTP iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FBA3339244DAC98006CA662 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4FBA333B244DAC98006CA662 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -106,6 +114,7 @@
 		4FBA3338244DAC98006CA662 /* RTP iOS */ = {
 			isa = PBXGroup;
 			children = (
+				4FD55BC0245063E3004859A9 /* Views */,
 				4FBA3339244DAC98006CA662 /* AppDelegate.swift */,
 				4FBA333B244DAC98006CA662 /* SceneDelegate.swift */,
 				4FBA333D244DAC98006CA662 /* ViewController.swift */,
@@ -113,6 +122,7 @@
 				4FBA3342244DAC99006CA662 /* Assets.xcassets */,
 				4FBA3344244DAC99006CA662 /* LaunchScreen.storyboard */,
 				4FBA3347244DAC99006CA662 /* Info.plist */,
+				4F48047D2450735B00BFF914 /* CameraSelectionViewController.swift */,
 			);
 			path = "RTP iOS";
 			sourceTree = "<group>";
@@ -140,6 +150,16 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4FD55BC0245063E3004859A9 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				4F48047B245066B100BFF914 /* CameraSettings.swift */,
+				4F48047F24507F1B00BFF914 /* CameraPicker.swift */,
+				4F4804812450832200BFF914 /* CameraFormatPicker.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -281,6 +301,10 @@
 				4FBA333E244DAC98006CA662 /* ViewController.swift in Sources */,
 				4FBA333A244DAC98006CA662 /* AppDelegate.swift in Sources */,
 				4FBA333C244DAC98006CA662 /* SceneDelegate.swift in Sources */,
+				4F48047C245066B100BFF914 /* CameraSettings.swift in Sources */,
+				4F48048024507F1B00BFF914 /* CameraPicker.swift in Sources */,
+				4F48047E2450735B00BFF914 /* CameraSelectionViewController.swift in Sources */,
+				4F4804822450832200BFF914 /* CameraFormatPicker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

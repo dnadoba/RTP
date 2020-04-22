@@ -29,6 +29,10 @@ final class CaptureSession {
         guard let cameraDevice = AVCaptureDevice.default(for: .video) else {
             throw Error.couldNoGetCaptureDevice
         }
+        for format in cameraDevice.formats where format.mediaType == .video && format.description.contains("'vide'/'420v'") {
+            print(format)
+            format.isVideoBinned
+        }
         let camerInput = try AVCaptureDeviceInput(device: cameraDevice)
         
         session.configure {
