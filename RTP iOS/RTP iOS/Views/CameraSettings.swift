@@ -9,12 +9,29 @@
 import SwiftUI
 import AVFoundation
 
+struct CameraSettingsViewModelWrapper: View {
+    @ObservedObject var settings: CameraSettingsViewModel
+    var body: some View {
+        CameraSettings(
+            cameras: settings.cameras,
+            formatsOfCamera: settings.formatsOfCamera,
+            selectedCamera: $settings.selectedCamera,
+            selectedDimmension: $settings.selectedDimension,
+            selectedFormat: $settings.selectedFormat,
+            preferedFrameRate: $settings.preferedFrameRate,
+            effectiveFrameRate: settings.effectiveFrameRate
+        )
+    }
+}
+
 struct CameraSettings: View {
     var cameras: [Camera]
-    @State var selectedCamera: Camera.ID?
-    var formats: [Camera.ID: CameraFormats]
-    @State var selectedFormat: CameraFormat?
-    @State var selectedFrameRate: Double?
+    var formatsOfCamera: [Camera.ID: CameraFormats]
+    @Binding var selectedCamera: Camera.ID?
+    @Binding var selectedDimmension: CameraFormat.Dimension?
+    @Binding var selectedFormat: CameraFormat?
+    @Binding var preferedFrameRate: Double?
+    var effectiveFrameRate: Double?
     var body: some View {
         NavigationView {
             Form {
@@ -27,7 +44,7 @@ struct CameraSettings: View {
     }
     private func makeFormatPickerView() -> AnyView {
         if let selectedCamera = self.selectedCamera,
-            let formats = self.formats[selectedCamera] {
+            let formats = self.formatsOfCamera[selectedCamera] {
             return AnyView(makeFormatPickerView(formats: formats))
         } else {
             return AnyView(EmptyView())
@@ -37,7 +54,9 @@ struct CameraSettings: View {
         CameraFormatPicker(
             formats: formats,
             selectedFormat: $selectedFormat,
-            selectedFrameRate: $selectedFrameRate
+            selectedDimension: $selectedDimmension,
+            preferedFrameRate: $preferedFrameRate,
+            effectiveFrameRate: effectiveFrameRate
         )
     }
 }

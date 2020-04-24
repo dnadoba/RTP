@@ -24,7 +24,7 @@ extension AVCaptureDevice.Position: Comparable {
 }
 
 extension AVCaptureDevice.Format {
-    static func isLhsBetterThenRhs(_ lhs: AVCaptureDevice.Format, rhs: AVCaptureDevice.Format) -> Bool {
+    static func isLhsBetterThenRhs(_ lhs: AVCaptureDevice.Format, _ rhs: AVCaptureDevice.Format) -> Bool {
         guard lhs.isVideoBinned == rhs.isVideoBinned else {
             return lhs.isVideoBinned
         }
@@ -81,13 +81,19 @@ final class CameraDiscovery {
     }
 }
 
-class CameraSelectionViewController: UIHostingController<CameraSettings> {
+class CameraSelectionViewController: UIHostingController<CameraSettingsViewModelWrapper> {
     let session = CameraDiscovery()
     init() {
-        super.init(rootView: CameraSettings(cameras: session.cameras, selectedCamera: session.cameras.first?.id, formats: session.formats))
+        super.init(rootView: CameraSettingsViewModelWrapper(settings: CameraSettingsViewModel(
+            cameras: session.cameras,
+            formatsOfCamera: session.formats
+        )))
     }
     
     @objc required dynamic init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder, rootView: CameraSettings(cameras: session.cameras, selectedCamera: session.cameras.first?.id, formats: session.formats))
+        super.init(coder: aDecoder, rootView: CameraSettingsViewModelWrapper(settings: CameraSettingsViewModel(
+            cameras: session.cameras,
+            formatsOfCamera: session.formats
+        )))
     }
 }

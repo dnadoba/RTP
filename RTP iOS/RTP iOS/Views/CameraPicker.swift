@@ -8,17 +8,6 @@
 
 import SwiftUI
 
-struct Camera: Hashable, Identifiable {
-    var id: String
-    var localizedName: String
-}
-
-extension Camera: ExpressibleByStringLiteral {
-    init(stringLiteral: String) {
-        self.init(id: UUID().description, localizedName: stringLiteral)
-    }
-}
-
 struct CameraPicker: View {
     var cameras: [Camera]
     @Binding var selectedCamera: Camera.ID?
