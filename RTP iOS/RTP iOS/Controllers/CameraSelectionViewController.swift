@@ -81,19 +81,44 @@ final class CameraDiscovery {
     }
 }
 
-class CameraSelectionViewController: UIHostingController<CameraSettingsViewModelWrapper> {
-    let session = CameraDiscovery()
-    init() {
-        super.init(rootView: CameraSettingsViewModelWrapper(settings: CameraSettingsViewModel(
+extension CameraSettingsViewModel {
+    convenience init(
+        selectedCamera: Camera.ID? = nil,
+        selectedCameraFormats: CameraFormats? = nil,
+        selectedFormat: CameraFormat? = nil,
+        preferedFrameRate: Double? = nil
+    ) {
+        let session = CameraDiscovery()
+        self.init(
             cameras: session.cameras,
-            formatsOfCamera: session.formats
-        )))
+            formatsOfCamera: session.formats,
+            selectedCamera: selectedCamera,
+            selectedCameraFormats: selectedCameraFormats,
+            selectedFormat: selectedFormat,
+            preferedFrameRate: preferedFrameRate
+        )
     }
-    
-    @objc required dynamic init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder, rootView: CameraSettingsViewModelWrapper(settings: CameraSettingsViewModel(
-            cameras: session.cameras,
-            formatsOfCamera: session.formats
-        )))
+}
+
+class CameraSelectionViewController: UIHostingController<CameraSettingsViewModelWrapper> {
+    convenience init() {
+        self.init(viewModel: CameraSettingsViewModel())
+    }
+    init(viewModel: CameraSettingsViewModel) {
+        var indirectCallback: (() -> ())?
+        super.init(rootView: CameraSettingsViewModelWrapper(settings: viewModel, dismiss: { indirectCallback?() }))
+        indirectCallback = { [weak self] in
+            self?.presentingViewController?.dismiss(animated: true)
+        }
+    }
+    @objc required dynamic convenience init?(coder aDecoder: NSCoder) {
+        self.init(coder: aDecoder, viewModel: CameraSettingsViewModel())
+    }
+    init?(coder aDecoder: NSCoder, viewModel: CameraSettingsViewModel) {
+        var indirectCallback: (() -> ())?
+        super.init(coder: aDecoder, rootView: CameraSettingsViewModelWrapper(settings: viewModel, dismiss: { indirectCallback?() }))
+        indirectCallback = { [weak self] in
+            self?.presentingViewController?.dismiss(animated: true)
+        }
     }
 }

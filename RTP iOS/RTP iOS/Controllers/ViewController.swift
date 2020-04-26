@@ -19,25 +19,64 @@ extension AVCaptureSession {
     }
 }
 
+extension AVCaptureDevice {
+    func configure<Result>(_ configure: (AVCaptureDevice) throws -> Result) throws -> Result {
+        try self.lockForConfiguration()
+        defer { self.unlockForConfiguration() }
+        return try configure(self)
+    }
+}
+
+extension CMTime {
+    init(frameRate: Double) {
+        self.init(value: 10000, timescale: Int32(frameRate * 10000))
+    }
+}
+
 final class CaptureSession {
     enum Error: Swift.Error {
         case couldNoGetCaptureDevice
+        case couldNotFindRequestedFormat
     }
     let session = AVCaptureSession()
+    private(set) var activeInput: AVCaptureDeviceInput?
     
     func setup() throws {
-        guard let cameraDevice = AVCaptureDevice.default(for: .video) else {
+        
+    }
+    
+    func setCamera(_ camera: Camera.ID, format: CameraFormat, frameRate: Double) throws {
+        
+        guard let camera = AVCaptureDevice(uniqueID: camera) else {
             throw Error.couldNoGetCaptureDevice
         }
-        for format in cameraDevice.formats where format.mediaType == .video && format.description.contains("'vide'/'420v'") {
-            print(format)
-            format.isVideoBinned
-        }
-        let camerInput = try AVCaptureDeviceInput(device: cameraDevice)
         
-        session.configure {
-            $0.addInput(camerInput)
-            $0.sessionPreset = .high
+        guard let format = camera.formats.first(where: { CameraFormat($0) == format }) else {
+            throw Error.couldNotFindRequestedFormat
+        }
+    
+        try camera.configure {
+            $0.activeFormat = format
+            $0.activeVideoMaxFrameDuration = CMTime(frameRate: max(frameRate/2, 15))
+            $0.activeVideoMinFrameDuration = CMTime(frameRate: frameRate)
+        }
+        
+        // switch active camera if needed
+        try setActiveInputIfNeeded(camera)
+    }
+    private func setActiveInputIfNeeded(_ device: AVCaptureDevice) throws{
+        if device != activeInput?.device {
+            let camerInput = try AVCaptureDeviceInput(device: device)
+            
+            session.configure {
+                if let oldInput = activeInput {
+                    $0.removeInput(oldInput)
+                }
+                activeInput = nil
+                $0.addInput(camerInput)
+                $0.sessionPreset = .inputPriority
+            }
+            self.activeInput = camerInput
         }
     }
     func start() throws {
@@ -58,6 +97,10 @@ final class VideoSessionController: NSObject {
         }
         
         output.setSampleBufferDelegate(self, queue: sampleQueue)
+    }
+    
+    func setCamera(_ camera: Camera.ID, format: CameraFormat, frameRate: Double) throws {
+        try captureSession.setCamera(camera, format: format, frameRate: frameRate)
     }
     
     func setup() throws {
@@ -98,13 +141,33 @@ extension UIInterfaceOrientation {
     }
 }
 
+import Combine
+
 
 class ViewController: UIViewController {
+    private static let settingsSegueId = "Open Settings"
+    
     let videoController = VideoSessionController(endpoint: .hostPort(host: "192.168.188.29", port: 1234))
-    var preview: PreviewView { self.view as! PreviewView }
+    let settingsViewModel = CameraSettingsViewModel()
+    @IBOutlet private weak var preview: PreviewView!
+    private var settingsViewModelCancelable: AnyCancellable?
     override func viewDidLoad() {
         super.viewDidLoad()
         preview.previewLayer.session = videoController.captureSession.session
+        
+        settingsViewModelCancelable = settingsViewModel.$selectedCamera
+            .combineLatest(settingsViewModel.$selectedFormat, settingsViewModel.$preferedFrameRate)
+            .debounce(for: .milliseconds(1), scheduler: RunLoop.main)
+            .sink(receiveValue: { [weak self] camera, format, _ in
+                
+                guard let camera = camera, let format = format, let frameRate = self?.settingsViewModel.effectiveFrameRate else { return }
+                do {
+                    try self?.videoController.setCamera(camera, format: format, frameRate: frameRate)
+                } catch {
+                    print(error)
+                }
+            })
+            
         do {
             try videoController.setup()
             try videoController.start()
@@ -126,6 +189,12 @@ class ViewController: UIViewController {
             self.updateVideoOrientation()
         })
         super.viewWillTransition(to: size, with: coordinator)
+    }
+    @IBSegueAction func settingsSegue(_ coder: NSCoder) -> UIViewController? {
+        return CameraSelectionViewController(coder: coder, viewModel: settingsViewModel)
+    }
+    @IBAction func openSettings(_ sender: Any) {
+        self.performSegue(withIdentifier: Self.settingsSegueId, sender: sender)
     }
 }
 

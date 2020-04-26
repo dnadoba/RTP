@@ -67,7 +67,7 @@ extension Sequence where Element == CameraFormat {
             guard lhsFrameRateDistance == rhsFrameRateDistance else {
                 return lhsFrameRateDistance < rhsFrameRateDistance
             }
-            return !CameraFormat.isLhsBetterThenRhs(lhs, rhs)
+            return !CameraFormat.isLhsBetterThanRhs(lhs, rhs)
         })
         return nearestFramerate
     }
@@ -86,15 +86,32 @@ extension CameraFormats {
             guard lhsFrameRateDistance == rhsFrameRateDistance else {
                 return lhsFrameRateDistance < rhsFrameRateDistance
             }
-            return !CameraFormat.isLhsBetterThenRhs(lhs, rhs)
+            return !CameraFormat.isLhsBetterThanRhs(lhs, rhs)
         })
     }
     func bestFormatMatching(frameRate: Double, preferedDimension: CameraFormat.Dimension) -> CameraFormat? {
         let matchingFrameRate = formats.filter({ $0.frameRateRange.contains(frameRate) })
         let matchingDimension = matchingFrameRate.filter({ $0.dimension == preferedDimension })
         guard matchingDimension.isEmpty else {
-            return matchingDimension.min(by: CameraFormat.isLhsBetterThenRhs(_:_:))
+            return matchingDimension.min(by: CameraFormat.isLhsBetterThanRhs(_:_:))
         }
         return matchingFrameRate.formatNearestTo(dimension: preferedDimension, frameRate: frameRate)
+    }
+}
+
+struct CommonDimension: Hashable {
+    static let allCases = [
+        CommonDimension(name: "VGA", dimension: .init(width: 640, height: 480)),
+        CommonDimension(name: "HD-Ready", dimension: .init(width: 1280, height: 720)),
+        CommonDimension(name: "Full-HD", dimension: .init(width: 1920, height: 1080)),
+        CommonDimension(name: "UHD", dimension: .init(width: 3840, height: 2160)),
+    ]
+    var name: String
+    var dimension: CameraFormat.Dimension
+}
+
+extension CameraFormats {
+    var selectedableCommonDimensions: [CommonDimension] {
+        CommonDimension.allCases.filter({ self.dimensions.contains($0.dimension) })
     }
 }

@@ -11,6 +11,7 @@ import AVFoundation
 
 struct CameraSettingsViewModelWrapper: View {
     @ObservedObject var settings: CameraSettingsViewModel
+    var dismiss: (() -> ())?
     var body: some View {
         CameraSettings(
             cameras: settings.cameras,
@@ -19,7 +20,8 @@ struct CameraSettingsViewModelWrapper: View {
             selectedDimmension: $settings.selectedDimension,
             selectedFormat: $settings.selectedFormat,
             preferedFrameRate: $settings.preferedFrameRate,
-            effectiveFrameRate: settings.effectiveFrameRate
+            effectiveFrameRate: settings.effectiveFrameRate,
+            onDismiss: dismiss
         )
     }
 }
@@ -32,6 +34,7 @@ struct CameraSettings: View {
     @Binding var selectedFormat: CameraFormat?
     @Binding var preferedFrameRate: Double?
     var effectiveFrameRate: Double?
+    var onDismiss: (() -> ())?
     var body: some View {
         NavigationView {
             Form {
@@ -39,7 +42,9 @@ struct CameraSettings: View {
                     CameraPicker(cameras: cameras, selectedCamera: $selectedCamera)
                 }
                 makeFormatPickerView()
-            }.navigationBarTitle("Settings")
+            }.navigationBarTitle("Settings").navigationBarItems(trailing: Button(action: {
+                self.onDismiss?()
+            }, label: { Text("Close") }))
         }.navigationViewStyle(StackNavigationViewStyle())
     }
     private func makeFormatPickerView() -> AnyView {

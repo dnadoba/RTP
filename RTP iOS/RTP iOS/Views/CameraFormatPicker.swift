@@ -119,6 +119,12 @@ struct CameraFormatPicker: View {
                             .tag(Optional.some(dimension))
                     }
                 }
+                Picker("Resolution", selection: $selectedDimension) {
+                    ForEach(formats.selectedableCommonDimensions, id: \.self) { commonDimension in
+                        Text("\(commonDimension.name)")
+                            .tag(Optional.some(commonDimension.dimension))
+                    }
+                }.pickerStyle(SegmentedPickerStyle())
                 if formats.maxFrameRateRange != nil {
                     Picker("Frame Rate", selection: frameRateBinding) {
                         ForEach(frameRates ?? [], id: \.self) { frameRate in

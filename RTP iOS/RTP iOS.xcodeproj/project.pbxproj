@@ -109,6 +109,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		4F8E79CA2453411300A409FB /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				4F48047D2450735B00BFF914 /* CameraSelectionViewController.swift */,
+				4FBA333D244DAC98006CA662 /* ViewController.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
 		4FBA332D244DAC98006CA662 = {
 			isa = PBXGroup;
 			children = (
@@ -133,16 +142,15 @@
 		4FBA3338244DAC98006CA662 /* RTP iOS */ = {
 			isa = PBXGroup;
 			children = (
+				4F8E79CA2453411300A409FB /* Controllers */,
 				4F8E79C124533F5100A409FB /* Models */,
 				4FD55BC0245063E3004859A9 /* Views */,
 				4FBA3339244DAC98006CA662 /* AppDelegate.swift */,
 				4FBA333B244DAC98006CA662 /* SceneDelegate.swift */,
-				4FBA333D244DAC98006CA662 /* ViewController.swift */,
 				4FBA333F244DAC98006CA662 /* Main.storyboard */,
 				4FBA3342244DAC99006CA662 /* Assets.xcassets */,
 				4FBA3344244DAC99006CA662 /* LaunchScreen.storyboard */,
 				4FBA3347244DAC99006CA662 /* Info.plist */,
-				4F48047D2450735B00BFF914 /* CameraSelectionViewController.swift */,
 			);
 			path = "RTP iOS";
 			sourceTree = "<group>";

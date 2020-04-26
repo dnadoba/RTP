@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="gRh-r5-XfR">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
@@ -11,14 +11,39 @@
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="RTP_iOS" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC" customClass="PreviewView" customModule="RTP_iOS" customModuleProvider="target">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aC6-q0-GEH" customClass="PreviewView" customModule="RTP_iOS" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <gestureRecognizers/>
+                                <viewLayoutGuide key="safeArea" id="XNW-qU-AkZ"/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="jXG-1w-EMU" appends="YES" id="5MA-Az-TjN"/>
+                                </connections>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="aC6-q0-GEH" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="2Z9-fS-vvJ"/>
+                            <constraint firstItem="aC6-q0-GEH" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="2fj-yt-1Ce"/>
+                            <constraint firstItem="aC6-q0-GEH" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" id="3f4-Yt-EAH"/>
+                            <constraint firstItem="aC6-q0-GEH" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="RSE-tn-2xe"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="preview" destination="aC6-q0-GEH" id="uNt-Py-QcE"/>
+                        <segue destination="gRh-r5-XfR" kind="presentation" identifier="Open Settings" destinationCreationSelector="settingsSegue:" id="8br-Sf-37H"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer numberOfTapsRequired="2" id="jXG-1w-EMU">
+                    <connections>
+                        <action selector="openSettings:" destination="BYZ-38-t0r" id="wrX-O7-cFf"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="139" y="137"/>
         </scene>
@@ -27,7 +52,7 @@
             <objects>
                 <viewController id="gRh-r5-XfR" customClass="CameraSelectionViewController" customModule="RTP_iOS" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Mxj-cY-s5o">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <viewLayoutGuide key="safeArea" id="viP-yH-rTY"/>
@@ -35,7 +60,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jXw-r8-1uJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="900" y="137"/>
+            <point key="canvasLocation" x="1055" y="137"/>
         </scene>
     </scenes>
 </document>
