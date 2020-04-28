@@ -147,12 +147,35 @@ import Combine
 class ViewController: UIViewController {
     private static let settingsSegueId = "Open Settings"
     
-    let videoController = VideoSessionController(endpoint: .hostPort(host: "192.168.188.29", port: 1234))
-    let settingsViewModel = CameraSettingsViewModel()
+    private var videoController: VideoSessionController?
+    private let settingsViewModel = CameraSettingsViewModel()
     @IBOutlet private weak var preview: PreviewView!
     private var settingsViewModelCancelable: AnyCancellable?
+    private let center = NotificationCenter.default
+    private var observerTokens = [AnyObject]()
+    deinit {
+        for token in observerTokens {
+            center.removeObserver(token)
+        }
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
+        start()
+        let token1 = center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.stop()
+        }
+        let token2 = center.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.start()
+        }
+        observerTokens += [token1, token2]
+    }
+    func stop() {
+        settingsViewModelCancelable = nil
+        videoController = nil
+    }
+    func start() {
+        let videoController = VideoSessionController(endpoint: .hostPort(host: "192.168.188.29", port: 1234))
+        self.videoController = videoController
         preview.previewLayer.session = videoController.captureSession.session
         
         settingsViewModelCancelable = settingsViewModel.$selectedCamera
@@ -162,13 +185,16 @@ class ViewController: UIViewController {
                 
                 guard let camera = camera, let format = format, let frameRate = self?.settingsViewModel.effectiveFrameRate else { return }
                 do {
-                    try self?.videoController.setCamera(camera, format: format, frameRate: frameRate)
+                    try self?.videoController?.setCamera(camera, format: format, frameRate: frameRate)
                 } catch {
                     print(error)
                 }
             })
             
         do {
+            if let camera = settingsViewModel.selectedCamera, let format = settingsViewModel.selectedFormat, let frameRate = settingsViewModel.effectiveFrameRate {
+                try videoController.setCamera(camera, format: format, frameRate: frameRate)
+            }
             try videoController.setup()
             try videoController.start()
         } catch {
