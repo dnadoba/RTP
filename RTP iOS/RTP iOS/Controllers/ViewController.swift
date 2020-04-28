@@ -45,7 +45,7 @@ final class CaptureSession {
         
     }
     
-    func setCamera(_ camera: Camera.ID, format: CameraFormat, frameRate: Double) throws {
+    func setCamera(_ camera: Camera.ID, format: CameraFormat, frameRate: Double, inputDidChange: () -> ()) throws {
         
         guard let camera = AVCaptureDevice(uniqueID: camera) else {
             throw Error.couldNoGetCaptureDevice
@@ -62,9 +62,9 @@ final class CaptureSession {
         }
         
         // switch active camera if needed
-        try setActiveInputIfNeeded(camera)
+        try setActiveInputIfNeeded(camera, inputDidChange: inputDidChange)
     }
-    private func setActiveInputIfNeeded(_ device: AVCaptureDevice) throws{
+    private func setActiveInputIfNeeded(_ device: AVCaptureDevice, inputDidChange: () -> ()) throws{
         if device != activeInput?.device {
             let camerInput = try AVCaptureDeviceInput(device: device)
             
@@ -75,6 +75,7 @@ final class CaptureSession {
                 activeInput = nil
                 $0.addInput(camerInput)
                 $0.sessionPreset = .inputPriority
+                inputDidChange()
             }
             self.activeInput = camerInput
         }
@@ -86,21 +87,30 @@ final class CaptureSession {
 
 final class VideoSessionController: NSObject {
     let output = AVCaptureVideoDataOutput()
+    var connection: AVCaptureConnection? { captureSession.session.connections.first(where: { $0.output == output }) }
     let sampleQueue = DispatchQueue(label: "de.nadoba.\(CaptureSession.self)", qos: .userInteractive)
     private let sender: RTPH264Sender
     let captureSession: CaptureSession = .init()
     init(endpoint: NWEndpoint) {
         sender = RTPH264Sender(endpoint: endpoint, targetQueue: sampleQueue)
+        
         super.init()
         captureSession.session.configure {
             $0.addOutput(output)
         }
-        
         output.setSampleBufferDelegate(self, queue: sampleQueue)
     }
     
-    func setCamera(_ camera: Camera.ID, format: CameraFormat, frameRate: Double) throws {
-        try captureSession.setCamera(camera, format: format, frameRate: frameRate)
+    func setCamera(
+        _ camera: Camera.ID,
+        format: CameraFormat,
+        frameRate: Double,
+        orientation: AVCaptureVideoOrientation
+    ) throws {
+        connection?.videoOrientation = orientation
+        try captureSession.setCamera(camera, format: format, frameRate: frameRate, inputDidChange: {
+            connection?.videoOrientation = orientation
+        })
     }
     
     func setup() throws {
@@ -153,6 +163,7 @@ class ViewController: UIViewController {
     private var settingsViewModelCancelable: AnyCancellable?
     private let center = NotificationCenter.default
     private var observerTokens = [AnyObject]()
+    private var orientation: AVCaptureVideoOrientation = .portrait
     deinit {
         for token in observerTokens {
             center.removeObserver(token)
@@ -160,7 +171,6 @@ class ViewController: UIViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        start()
         let token1 = center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { [weak self] _ in
             self?.stop()
         }
@@ -181,34 +191,43 @@ class ViewController: UIViewController {
         settingsViewModelCancelable = settingsViewModel.$selectedCamera
             .combineLatest(settingsViewModel.$selectedFormat, settingsViewModel.$preferedFrameRate)
             .debounce(for: .milliseconds(1), scheduler: RunLoop.main)
-            .sink(receiveValue: { [weak self] camera, format, _ in
-                
-                guard let camera = camera, let format = format, let frameRate = self?.settingsViewModel.effectiveFrameRate else { return }
+            .sink(receiveValue: { [weak self] _, _, _ in
                 do {
-                    try self?.videoController?.setCamera(camera, format: format, frameRate: frameRate)
+                    try self?.updateCameraSettings()
                 } catch {
                     print(error)
                 }
             })
             
         do {
-            if let camera = settingsViewModel.selectedCamera, let format = settingsViewModel.selectedFormat, let frameRate = settingsViewModel.effectiveFrameRate {
-                try videoController.setCamera(camera, format: format, frameRate: frameRate)
-            }
+            try updateCameraSettings()
             try videoController.setup()
             try videoController.start()
         } catch {
             print(error, #file, #line)
         }
     }
+    private func updateCameraSettings() throws {
+        if let camera = settingsViewModel.selectedCamera, let format = settingsViewModel.selectedFormat, let frameRate = settingsViewModel.effectiveFrameRate {
+            try videoController?.setCamera(camera, format: format, frameRate: frameRate, orientation: orientation)
+        }
+    }
     override func viewWillAppear(_ animated: Bool) {
         updateVideoOrientation()
+        start()
         super.viewWillAppear(animated)
     }
     private func updateVideoOrientation() {
         // UIApplication.shared.statusBarOrientation is deprecated but I could not find an alternativ
         // UIDevice.current.orientation does not work as expected on startup
-        preview.previewLayer.connection?.videoOrientation = UIApplication.shared.statusBarOrientation.av
+        let orientation = UIApplication.shared.statusBarOrientation.av
+        preview.previewLayer.connection?.videoOrientation = orientation
+        self.orientation = orientation
+        do {
+            try self.updateCameraSettings()
+        } catch {
+            print(error)
+        }
     }
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         coordinator.animate(alongsideTransition: { (context) -> Void in
