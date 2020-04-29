@@ -29,7 +29,7 @@ class ViewController: NSViewController {
     var sender: RTPH264AssetSender?
     override func viewDidLoad() {
         super.viewDidLoad()
-        reciever = RTPH264Reciever(host: "127.0.0.1", port: 1234)
+        reciever = RTPH264Reciever(host: "127.0.0.1", port: 1234, timebase: videoView.displayLayer.timebase)
         //reciever = RTPH264Reciever(host: "224.0.0.1", port: 1234)
         reciever?.callback = { buffer in
             DispatchQueue.main.async {

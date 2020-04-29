@@ -67,21 +67,12 @@ final class RTPH264Reciever {
     let queue = DispatchQueue(label: "de.nadoba.\(RTPH264Reciever.self).udp")
     let listen: NWListener
     var callback: Callback?
-    init(host: NWEndpoint.Host, port: NWEndpoint.Port) {
+    private var timeManager: VideoPresentationTimeManager
+    init(host: NWEndpoint.Host, port: NWEndpoint.Port, timebase: CMTimebase) {
+        timeManager = .init(timebase: timebase)
         let parameters = NWParameters.udp
         parameters.requiredLocalEndpoint = NWEndpoint.hostPort(host: "0.0.0.0", port: port)
         listen = try! NWListener(using: parameters)
-        
-//        connection.stateUpdateHandler = {
-//            print($0)
-//            if $0 == .ready {
-//                self.scheduleReciveMessage(connection: self.connection)
-//            }
-//        }
-//        connection.start(queue: queue)
-//        queue.async {
-//            self.scheduleReciveMessage(connection: self.connection)
-//        }
         
         listen.newConnectionHandler = { connection in
             
@@ -205,8 +196,9 @@ final class RTPH264Reciever {
             print("did recieve VCL NALU of type \(nalu.header.type) before formatDescription is ready")
             return
         }
+        let presentationTime = timeManager.getPresentationTime(for: Int64(header.timestamp))
         do {
-            let buffer = try sampleBufferFromNalu(nalu, timestamp: header.timestamp, formatDescription: formatDescription)
+            let buffer = try nalu.sampleBuffer(formatDescription: formatDescription, time: presentationTime, duration: .invalid)
             if let callback = callback {
                 callback(buffer)
             } else {
@@ -247,6 +239,88 @@ func CMVideoFormatDescriptionCreateForH264From(sequenceParameterSet: H264.NALUni
             }
             return unwrapedFormatDescription
         }
+    }
+}
+
+extension BinaryFloatingPoint {
+    @inlinable
+    public func interpolatedValue(to end: Self, at position: Double) -> Self {
+        let start = self
+        return (end - start) * Self(position) + start
+    }
+}
+
+struct VideoPresentationTimeManager {
+    static let rtpClockRate: Int32 = 90_000
+    var timescale: Int32
+    var initalBufferTime: CMTime
+    var bufferDelay: CMTime?
+    var timebase: CMTimebase
+    init(initalBufferTime: CMTime, timescale: Int32 = VideoPresentationTimeManager.rtpClockRate, timebase: CMTimebase) {
+        self.initalBufferTime = initalBufferTime
+        self.timescale = timescale
+        self.timebase = timebase
+    }
+    init(
+        innitalBufferTimeInSeconds: TimeInterval = 0,//6ms
+        timescale: Int32 = VideoPresentationTimeManager.rtpClockRate,
+        timebase: CMTimebase
+    ) {
+        self.init(initalBufferTime: CMTime(seconds: innitalBufferTimeInSeconds, preferredTimescale: timescale), timescale: timescale, timebase: timebase)
+    }
+    private func makeTime(from timestamp: Int64) -> CMTime {
+        CMTime(value: timestamp, timescale: timescale)
+    }
+    private func getDelay() -> CMTime {
+        bufferDelay ?? initalBufferTime
+    }
+    var remoteStartTime: CMTime?
+    private mutating func getRemoteOffset(for time: CMTime) -> CMTime {
+        guard let firstTimestamp = remoteStartTime else {
+            self.resetRemoteStart(to: time)
+            return .zero
+        }
+        return time - firstTimestamp
+    }
+    var localStartTime: CMTime?
+    var prevOffset: CMTime?
+    private mutating func resetRemoteStart(to time: CMTime) {
+        self.remoteStartTime = time
+        self.localStartTime = nil
+    }
+    mutating func getPresentationTime(for timestamp: Int64) -> CMTime {
+        let time = makeTime(from: timestamp)
+        var timeOffset = getRemoteOffset(for: time)
+        defer { prevOffset = timeOffset }
+        // reset offset if needed
+        if let prevOffset = prevOffset {
+            let difference = abs(timeOffset.seconds - prevOffset.seconds)
+            if difference > 1 {
+                resetRemoteStart(to: time)
+                timeOffset = .zero
+            }
+        }
+        let localStartTime: CMTime = {
+            guard let localStartTime = self.localStartTime else {
+                let now = timebase.time.convertScale(timescale, method: .default)
+                self.localStartTime = now
+                return now
+            }
+            return localStartTime
+        }()
+        let localTimestamp = localStartTime + timeOffset
+        let absDrif = (localTimestamp + getDelay() - timebase.time).seconds
+        
+        //print("drift", absDrif * 1000, "ms")
+        let currentDelay = getDelay().seconds
+        //print("currentDelay:", currentDelay * 1000, "ms")
+        let destinationDelay = (timebase.time - localTimestamp).seconds + 0.016
+        let newDelay = currentDelay.interpolatedValue(to: destinationDelay, at: 0.05)
+        
+        
+        bufferDelay = CMTime(seconds: newDelay, preferredTimescale: timescale)
+        return localTimestamp + getDelay()
+        //return timebase.time
     }
 }
 
@@ -296,64 +370,63 @@ enum SampleBufferError: Error {
     case canNotCreateBufferFromNalusOfDifferentHeaders
 }
 
-
-func sampleBufferFromNalu(_ nalu: H264.NALUnit<Data>, timestamp: UInt32, formatDescription: CMFormatDescription) throws -> CMSampleBuffer {
-    // Prepend the size of the data to the data as a 32-bit network endian uint. (keyword: "elementary stream")
-    let offset = 0
-    let size = UInt32((nalu.payload.count - offset) + 1)
-    
-    let prefix = size.toNetworkByteOrder.data + Data([nalu.header.byte])
-    var data = prefix.withUnsafeBytes{ (header) in
-        DispatchData(bytes: header)
+extension H264.NALUnit where D == Data {
+    func sampleBuffer(formatDescription: CMFormatDescription, time: CMTime, duration: CMTime = .invalid) throws -> CMSampleBuffer {
+        // Prepend the size of the data to the data as a 32-bit network endian uint. (keyword: "elementary stream")
+        let offset = 0
+        let size = UInt32((self.payload.count - offset) + 1)
+        
+        let prefix = size.toNetworkByteOrder.data + Data([self.header.byte])
+        var data = prefix.withUnsafeBytes{ (header) in
+            DispatchData(bytes: header)
+        }
+        assert(data.count == 5)
+        self.payload.withUnsafeBytes { (payload) in
+            let payload = UnsafeRawBufferPointer(start: payload.baseAddress!.advanced(by: offset), count: payload.count - offset)
+            data.append(payload)
+        }
+        assert(data.count == size + 4)
+        
+        let blockBuffer = try data.toCMBlockBuffer()
+        
+        // So what about STAP???? From CMSampleBufferCreate "Behavior is undefined if samples in a CMSampleBuffer (or even in multiple buffers in the same stream) have the same presentationTimeStamp"
+        
+        // Computer the duration and time
+        
+        
+        
+        // Inputs to CMSampleBufferCreate
+        let timingInfo: [CMSampleTimingInfo] = [CMSampleTimingInfo(duration: duration, presentationTimeStamp: time, decodeTimeStamp: .invalid)]
+        let sampleSizes: [Int] = [CMBlockBufferGetDataLength(blockBuffer)]
+        
+        // Outputs from CMSampleBufferCreate
+        var sampleBuffer: CMSampleBuffer?
+        
+        let result = CMSampleBufferCreate(
+            allocator: kCFAllocatorDefault,            // allocator: CFAllocator?,
+            dataBuffer: blockBuffer,                    // dataBuffer: CMBlockBuffer?,
+            dataReady: true,                           // dataReady: Boolean,
+            makeDataReadyCallback: nil,                            // makeDataReadyCallback: CMSampleBufferMakeDataReadyCallback?,
+            refcon: nil,                            // makeDataReadyRefcon: UnsafeMutablePointer<Void>,
+            formatDescription: formatDescription,              // formatDescription: CMFormatDescription?,
+            sampleCount: 1,                              // numSamples: CMItemCount,
+            sampleTimingEntryCount: timingInfo.count,               // numSampleTimingEntries: CMItemCount,
+            sampleTimingArray: timingInfo,                     // sampleTimingArray: UnsafePointer<CMSampleTimingInfo>,
+            sampleSizeEntryCount: sampleSizes.count,              // numSampleSizeEntries: CMItemCount,
+            sampleSizeArray: sampleSizes,                    // sampleSizeArray: UnsafePointer<Int>,
+            sampleBufferOut: &sampleBuffer                   // sBufOut: UnsafeMutablePointer<Unmanaged<CMSampleBuffer>?>
+        )
+        
+        guard result == kOSReturnSuccess, let unwrapedSampleBuffer = sampleBuffer else {
+            throw OSStatusError(osStatus: result, description: "CMSampleBufferCreate() failed")
+        }
+        
+        //    if let attachmentsOfSampleBuffers = CMSampleBufferGetSampleAttachmentsArray(unwrapedSampleBuffer, createIfNecessary: true) as? [NSMutableDictionary] {
+        //        for attachments in attachmentsOfSampleBuffers {
+        //            attachments[kCMSampleAttachmentKey_DisplayImmediately] = NSNumber(value: true)
+        //        }
+        //    }
+        
+        return unwrapedSampleBuffer
     }
-    assert(data.count == 5)
-    nalu.payload.withUnsafeBytes { (payload) in
-       
-        let payload = UnsafeRawBufferPointer(start: payload.baseAddress!.advanced(by: offset), count: payload.count - offset)
-        data.append(payload)
-    }
-    assert(data.count == size + 4)
-    
-    let blockBuffer = try data.toCMBlockBuffer()
-
-    // So what about STAP???? From CMSampleBufferCreate "Behavior is undefined if samples in a CMSampleBuffer (or even in multiple buffers in the same stream) have the same presentationTimeStamp"
-
-    // Computer the duration and time
-    let duration = CMTime.invalid // CMTimeMake(3000, H264ClockRate) // TODO: 1/30th of a second. Making this up.
-
-    //let time = CMTime(value: Int64(timestamp), timescale: h264ClockRate)
-    let time = CMClockGetHostTimeClock().time
-    // Inputs to CMSampleBufferCreate
-    let timingInfo: [CMSampleTimingInfo] = [CMSampleTimingInfo(duration: duration, presentationTimeStamp: time, decodeTimeStamp: time)]
-    let sampleSizes: [Int] = [CMBlockBufferGetDataLength(blockBuffer)]
-
-    // Outputs from CMSampleBufferCreate
-    var sampleBuffer: CMSampleBuffer?
-
-    let result = CMSampleBufferCreate(
-        allocator: kCFAllocatorDefault,            // allocator: CFAllocator?,
-        dataBuffer: blockBuffer,                    // dataBuffer: CMBlockBuffer?,
-        dataReady: true,                           // dataReady: Boolean,
-        makeDataReadyCallback: nil,                            // makeDataReadyCallback: CMSampleBufferMakeDataReadyCallback?,
-        refcon: nil,                            // makeDataReadyRefcon: UnsafeMutablePointer<Void>,
-        formatDescription: formatDescription,              // formatDescription: CMFormatDescription?,
-        sampleCount: 1,                              // numSamples: CMItemCount,
-        sampleTimingEntryCount: timingInfo.count,               // numSampleTimingEntries: CMItemCount,
-        sampleTimingArray: timingInfo,                     // sampleTimingArray: UnsafePointer<CMSampleTimingInfo>,
-        sampleSizeEntryCount: sampleSizes.count,              // numSampleSizeEntries: CMItemCount,
-        sampleSizeArray: sampleSizes,                    // sampleSizeArray: UnsafePointer<Int>,
-        sampleBufferOut: &sampleBuffer                   // sBufOut: UnsafeMutablePointer<Unmanaged<CMSampleBuffer>?>
-    )
-
-    guard result == kOSReturnSuccess, let unwrapedSampleBuffer = sampleBuffer else {
-        throw OSStatusError(osStatus: result, description: "CMSampleBufferCreate() failed")
-    }
-    
-//    if let attachmentsOfSampleBuffers = CMSampleBufferGetSampleAttachmentsArray(unwrapedSampleBuffer, createIfNecessary: true) as? [NSMutableDictionary] {
-//        for attachments in attachmentsOfSampleBuffers {
-//            attachments[kCMSampleAttachmentKey_DisplayImmediately] = NSNumber(value: true)
-//        }
-//    }
-
-    return unwrapedSampleBuffer
 }

@@ -91,6 +91,7 @@ final class VideoSessionController: NSObject {
     let sampleQueue = DispatchQueue(label: "de.nadoba.\(CaptureSession.self)", qos: .userInteractive)
     private let sender: RTPH264Sender
     let captureSession: CaptureSession = .init()
+    var frameRate: Double = 60
     init(endpoint: NWEndpoint) {
         sender = RTPH264Sender(endpoint: endpoint, targetQueue: sampleQueue)
         
@@ -106,18 +107,37 @@ final class VideoSessionController: NSObject {
         format: CameraFormat,
         frameRate: Double,
         orientation: AVCaptureVideoOrientation
-    ) throws {
-        connection?.videoOrientation = orientation
-        try captureSession.setCamera(camera, format: format, frameRate: frameRate, inputDidChange: {
-            connection?.videoOrientation = orientation
-        })
+    ) {
+        sampleQueue.async {
+            do {
+                self.frameRate = frameRate
+                self.connection?.videoOrientation = orientation
+                try self.captureSession.setCamera(camera, format: format, frameRate: frameRate, inputDidChange: {
+                    self.connection?.videoOrientation = orientation
+                })
+            } catch {
+                print(error)
+            }
+        }
     }
     
-    func setup() throws {
-        try captureSession.setup()
+    func setup() {
+        sampleQueue.async {
+            do {
+                try self.captureSession.setup()
+            } catch {
+                print(error)
+            }
+        }
     }
-    func start() throws {
-        try captureSession.start()
+    func start() {
+        //sampleQueue.async {
+            do {
+                try self.captureSession.start()
+            } catch {
+                print(error)
+            }
+        //}
     }
 }
 
@@ -128,7 +148,7 @@ extension VideoSessionController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         let presentationTime = sampleBuffer.presentationTimeStamp
         guard let image = sampleBuffer.imageBuffer else { return }
-        sender.encodeAndSendFrame(image, presentationTimeStamp: presentationTime, frameDuration: .invalid)
+        sender.encodeAndSendFrame(image, presentationTimeStamp: presentationTime, frameDuration: CMTime(frameRate: frameRate))
     }
 }
 
@@ -192,24 +212,16 @@ class ViewController: UIViewController {
             .combineLatest(settingsViewModel.$selectedFormat, settingsViewModel.$preferedFrameRate)
             .debounce(for: .milliseconds(1), scheduler: RunLoop.main)
             .sink(receiveValue: { [weak self] _, _, _ in
-                do {
-                    try self?.updateCameraSettings()
-                } catch {
-                    print(error)
-                }
+                self?.updateCameraSettings()
             })
             
-        do {
-            try updateCameraSettings()
-            try videoController.setup()
-            try videoController.start()
-        } catch {
-            print(error, #file, #line)
-        }
+        updateCameraSettings()
+        videoController.setup()
+        videoController.start()
     }
-    private func updateCameraSettings() throws {
+    private func updateCameraSettings() {
         if let camera = settingsViewModel.selectedCamera, let format = settingsViewModel.selectedFormat, let frameRate = settingsViewModel.effectiveFrameRate {
-            try videoController?.setCamera(camera, format: format, frameRate: frameRate, orientation: orientation)
+            videoController?.setCamera(camera, format: format, frameRate: frameRate, orientation: orientation)
         }
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -223,11 +235,7 @@ class ViewController: UIViewController {
         let orientation = UIApplication.shared.statusBarOrientation.av
         preview.previewLayer.connection?.videoOrientation = orientation
         self.orientation = orientation
-        do {
-            try self.updateCameraSettings()
-        } catch {
-            print(error)
-        }
+        self.updateCameraSettings()
     }
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         coordinator.animate(alongsideTransition: { (context) -> Void in
