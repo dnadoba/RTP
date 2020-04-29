@@ -23,10 +23,10 @@ struct CameraPicker: View {
 
 struct CameraPicker_Previews: PreviewProvider, View {
     static let cameras: [Camera] = [
-        "Back Camera",
-        "Back Telephoto Camera",
-        "Back Dual Camera",
-        "Front Camera",
+        Camera(testName: "Back Camera", position: .back),
+        Camera(testName: "Back Telephoto Camera", position: .back),
+        Camera(testName: "Back Dual Camera", position: .back),
+        Camera(testName: "Front Camera", position: .front),
     ]
     static var previews: some View {
         CameraPicker_Previews(cameras: Self.cameras, selectedCamera: Self.cameras.first?.id)

@@ -11,7 +11,8 @@ import Foundation
 final class CameraSettingsViewModel: ObservableObject {
     @Published var cameras: [Camera]
     @Published var formatsOfCamera: [Camera.ID: CameraFormats]
-    @Published var selectedCamera: Camera.ID? = nil {
+    var selectedCamera: Camera? { cameras.first(where: { $0.id == selectedCameraId }) }
+    @Published var selectedCameraId: Camera.ID? = nil {
         didSet {
             if let dimmension = self.selectedDimension,
                 let frameRate = preferedFrameRate ?? effectiveFrameRate,
@@ -21,7 +22,7 @@ final class CameraSettingsViewModel: ObservableObject {
         }
     }
     var selectedCameraFormats: CameraFormats? {
-        selectedCamera.flatMap({ formatsOfCamera[$0] })
+        selectedCameraId.flatMap({ formatsOfCamera[$0] })
     }
     @Published var selectedFormat: CameraFormat? = nil
     
@@ -66,7 +67,7 @@ final class CameraSettingsViewModel: ObservableObject {
     ) {
         self.cameras = cameras
         self.formatsOfCamera = formatsOfCamera
-        self.selectedCamera = selectedCamera ?? defaultCamera
+        self.selectedCameraId = selectedCamera ?? defaultCamera
         self.selectedFormat = selectedFormat ?? self.selectedCameraFormats?.defaultForamt
         self.preferedFrameRate = preferedFrameRate
     }

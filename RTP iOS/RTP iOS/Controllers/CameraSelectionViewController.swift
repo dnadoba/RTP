@@ -58,12 +58,24 @@ extension AVCaptureDevice {
     }
 }
 
+extension AVCaptureDevice.Position {
+    var position: Camera.Position {
+        switch self {
+        case .unspecified: return .unspecified
+        case .back: return .back
+        case .front: return .front
+        @unknown default: return .unspecified
+        }
+    }
+}
+
+
 final class CameraDiscovery {
     private let session: AVCaptureDevice.DiscoverySession
     var cameras: [Camera] {
         session.devices
             .sorted(by: { $0.position < $1.position })
-            .map({ Camera(id: $0.uniqueID, localizedName: $0.localizedName) })
+            .map({ Camera(id: $0.uniqueID, localizedName: $0.localizedName, position: $0.position.position) })
     }
     var formats: [Camera.ID: CameraFormats] {
         Dictionary(uniqueKeysWithValues: session.devices.map({

@@ -16,7 +16,7 @@ struct CameraSettingsViewModelWrapper: View {
         CameraSettings(
             cameras: settings.cameras,
             formatsOfCamera: settings.formatsOfCamera,
-            selectedCamera: $settings.selectedCamera,
+            selectedCamera: $settings.selectedCameraId,
             selectedDimmension: $settings.selectedDimension,
             selectedFormat: $settings.selectedFormat,
             preferedFrameRate: $settings.preferedFrameRate,
@@ -79,7 +79,7 @@ struct CameraSettings: View {
 //    static var previews: some View {
 //        CameraSettings(
 //            cameras: Self.cameras,
-//            selectedCamera: Self.cameras.first?.id,
+//            selectedCameraId: Self.cameras.first?.id,
 //            formats: Self.formats,
 //            selectedFormat: Self.cameras.first?.id.map({ Self.formats[ }))
 //    }

@@ -8,12 +8,18 @@
 
 import Foundation
 struct Camera: Hashable, Identifiable {
+    enum Position {
+        case front
+        case back
+        case unspecified
+    }
     var id: String
     var localizedName: String
+    var position: Position
 }
 
-extension Camera: ExpressibleByStringLiteral {
-    init(stringLiteral: String) {
-        self.init(id: UUID().description, localizedName: stringLiteral)
+extension Camera {
+    init(testName: String, position: Position) {
+        self.init(id: UUID().uuidString, localizedName: testName, position: position)
     }
 }

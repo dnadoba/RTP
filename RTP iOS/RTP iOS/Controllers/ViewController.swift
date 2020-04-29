@@ -45,9 +45,9 @@ final class CaptureSession {
         
     }
     
-    func setCamera(_ camera: Camera.ID, format: CameraFormat, frameRate: Double, inputDidChange: () -> ()) throws {
+    func setCamera(_ camera: Camera, format: CameraFormat, frameRate: Double, inputDidChange: () -> ()) throws {
         
-        guard let camera = AVCaptureDevice(uniqueID: camera) else {
+        guard let camera = AVCaptureDevice(uniqueID: camera.id) else {
             throw Error.couldNoGetCaptureDevice
         }
         
@@ -103,7 +103,7 @@ final class VideoSessionController: NSObject {
     }
     
     func setCamera(
-        _ camera: Camera.ID,
+        _ camera: Camera,
         format: CameraFormat,
         frameRate: Double,
         orientation: AVCaptureVideoOrientation
@@ -112,8 +112,10 @@ final class VideoSessionController: NSObject {
             do {
                 self.frameRate = frameRate
                 self.connection?.videoOrientation = orientation
+                self.connection?.isVideoMirrored = camera.position == .front
                 try self.captureSession.setCamera(camera, format: format, frameRate: frameRate, inputDidChange: {
-                    self.connection?.videoOrientation = orientation
+                    self.connection?.isVideoMirrored = true
+                    self.connection?.isVideoMirrored = camera.position == .front
                 })
             } catch {
                 print(error)
@@ -208,7 +210,7 @@ class ViewController: UIViewController {
         self.videoController = videoController
         preview.previewLayer.session = videoController.captureSession.session
         
-        settingsViewModelCancelable = settingsViewModel.$selectedCamera
+        settingsViewModelCancelable = settingsViewModel.$selectedCameraId
             .combineLatest(settingsViewModel.$selectedFormat, settingsViewModel.$preferedFrameRate)
             .debounce(for: .milliseconds(1), scheduler: RunLoop.main)
             .sink(receiveValue: { [weak self] _, _, _ in
