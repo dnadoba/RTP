@@ -18,6 +18,7 @@
 		4F8E79C524533FB000A409FB /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8E79C424533FB000A409FB /* Camera.swift */; };
 		4F8E79C724533FDA00A409FB /* CameraFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8E79C624533FDA00A409FB /* CameraFormat.swift */; };
 		4F8E79C92453404200A409FB /* CameraFormats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8E79C82453404200A409FB /* CameraFormats.swift */; };
+		4FA673432459AEB50070366D /* CPUUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FA673422459AEB50070366D /* CPUUsage.swift */; };
 		4FBA333A244DAC98006CA662 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBA3339244DAC98006CA662 /* AppDelegate.swift */; };
 		4FBA333C244DAC98006CA662 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBA333B244DAC98006CA662 /* SceneDelegate.swift */; };
 		4FBA333E244DAC98006CA662 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBA333D244DAC98006CA662 /* ViewController.swift */; };
@@ -54,6 +55,7 @@
 		4F8E79C424533FB000A409FB /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		4F8E79C624533FDA00A409FB /* CameraFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFormat.swift; sourceTree = "<group>"; };
 		4F8E79C82453404200A409FB /* CameraFormats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFormats.swift; sourceTree = "<group>"; };
+		4FA673422459AEB50070366D /* CPUUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPUUsage.swift; sourceTree = "<group>"; };
 		4FBA3336244DAC98006CA662 /* RTP iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RTP iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FBA3339244DAC98006CA662 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4FBA333B244DAC98006CA662 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				4FBA3342244DAC99006CA662 /* Assets.xcassets */,
 				4FBA3344244DAC99006CA662 /* LaunchScreen.storyboard */,
 				4FBA3347244DAC99006CA662 /* Info.plist */,
+				4FA673422459AEB50070366D /* CPUUsage.swift */,
 			);
 			path = "RTP iOS";
 			sourceTree = "<group>";
@@ -328,6 +331,7 @@
 			files = (
 				4FBA333E244DAC98006CA662 /* ViewController.swift in Sources */,
 				4F8E79C324533F8100A409FB /* CameraSettingsModel.swift in Sources */,
+				4FA673432459AEB50070366D /* CPUUsage.swift in Sources */,
 				4FBA333A244DAC98006CA662 /* AppDelegate.swift in Sources */,
 				4FBA333C244DAC98006CA662 /* SceneDelegate.swift in Sources */,
 				4F48047C245066B100BFF914 /* CameraSettings.swift in Sources */,

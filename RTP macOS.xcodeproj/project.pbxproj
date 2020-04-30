@@ -14,6 +14,7 @@
 		4F4CB337244DCCB40021B1A3 /* RTPAVKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F4CB336244DCCB40021B1A3 /* RTPAVKit */; };
 		4F7E23D6244DB0DB00ABC133 /* SwiftRTP in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D5244DB0DB00ABC133 /* SwiftRTP */; };
 		4F7E23D8244DB0E000ABC133 /* BinaryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7E23D7244DB0E000ABC133 /* BinaryKit */; };
+		4FA673412459ADC60070366D /* CPUUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FA673402459ADC60070366D /* CPUUsage.swift */; };
 		4FACAEFE243F52E500F228A8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAEFD243F52E500F228A8 /* AppDelegate.swift */; };
 		4FACAF00243F52E500F228A8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FACAEFF243F52E500F228A8 /* ViewController.swift */; };
 		4FACAF02243F52E600F228A8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4FACAF01243F52E600F228A8 /* Assets.xcassets */; };
@@ -45,6 +46,7 @@
 		4F071EE42449F69000F8A054 /* SalesPerSecond(1).mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "SalesPerSecond(1).mov"; sourceTree = "<group>"; };
 		4F071EE62449FDF300F8A054 /* RepeatingTimer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatingTimer.swift; sourceTree = "<group>"; };
 		4F44469F244768E0005F8996 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = .gitignore; path = ../SwiftRTP/.gitignore; sourceTree = "<group>"; };
+		4FA673402459ADC60070366D /* CPUUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CPUUsage.swift; path = "../RTP iOS/RTP iOS/CPUUsage.swift"; sourceTree = "<group>"; };
 		4FACAEFA243F52E500F228A8 /* RTP macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RTP macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FACAEFD243F52E500F228A8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4FACAEFF243F52E500F228A8 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 				4FACAF07243F52E600F228A8 /* RTP macOS.entitlements */,
 				4FACAF2A2440D8E000F228A8 /* RTPH264Reciever.swift */,
 				4F071EDC2449EFCF00F8A054 /* RTPH264AssetSender.swift */,
+				4FA673402459ADC60070366D /* CPUUsage.swift */,
 			);
 			path = "RTP macOS";
 			sourceTree = "<group>";
@@ -292,6 +295,7 @@
 			files = (
 				4FACAF00243F52E500F228A8 /* ViewController.swift in Sources */,
 				4F071EDD2449EFCF00F8A054 /* RTPH264AssetSender.swift in Sources */,
+				4FA673412459ADC60070366D /* CPUUsage.swift in Sources */,
 				4FACAEFE243F52E500F228A8 /* AppDelegate.swift in Sources */,
 				4FACAF2B2440D8E000F228A8 /* RTPH264Reciever.swift in Sources */,
 				4F071EE72449FDF300F8A054 /* RepeatingTimer.swift in Sources */,
