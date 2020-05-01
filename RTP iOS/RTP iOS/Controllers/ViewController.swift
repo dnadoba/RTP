@@ -100,6 +100,10 @@ final class VideoSessionController: NSObject {
             $0.addOutput(output)
         }
         output.setSampleBufferDelegate(self, queue: sampleQueue)
+        let formatter = ByteCountFormatter()
+        sender.onCollectConnectionMetric = { report in
+            print(formatter.string(fromByteCount: Int64(report.aggregatePathReport.sentApplicationByteCount)))
+        }
     }
     
     func setCamera(
@@ -206,7 +210,7 @@ class ViewController: UIViewController {
         videoController = nil
     }
     func start() {
-        let videoController = VideoSessionController(endpoint: .hostPort(host: "192.168.188.29", port: 1234))
+        let videoController = VideoSessionController(endpoint: .hostPort(host: "davids-macbook-pro.local", port: 1234))
         self.videoController = videoController
         preview.previewLayer.session = videoController.captureSession.session
         
